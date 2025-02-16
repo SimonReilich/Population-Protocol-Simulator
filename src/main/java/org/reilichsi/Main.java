@@ -1,8 +1,13 @@
 package org.reilichsi;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
+import java.util.function.Function;
 
 public class Main {
     private static String[] state;
@@ -10,64 +15,97 @@ public class Main {
     private static Map<String, Boolean> output;
 
     public static void main(String[] args) {
-        state = new String[]{"Ay", "Ay", "Ay", "Ay", "An", "An", "An", "An"};
+        Scanner scanner = new Scanner(System.in);
+        String fileName;
+        String[] lines = new String[0];
 
-        transitions = new HashMap<>();
-        transitions.put("Ay,At", new String[]{"Ay", "Py"});
-        transitions.put("Ay,An", new String[]{"At", "Pt"});
-        transitions.put("At,An", new String[]{"An", "Pn"});
-        transitions.put("At,At", new String[]{"At", "Pt"});
-
-        transitions.put("Ay,Pt", new String[]{"Ay", "Py"});
-        transitions.put("At,Pn", new String[]{"At", "Pt"});
-        transitions.put("An,Py", new String[]{"An", "Pn"});
-        transitions.put("Ay,Pn", new String[]{"Ay", "Py"});
-        transitions.put("At,Py", new String[]{"At", "Pt"});
-        transitions.put("An,Pt", new String[]{"An", "Pn"});
-
-        output = new HashMap<>();
-        output.put("Ay", true);
-        output.put("At", false);
-        output.put("An", false);
-        output.put("Py", true);
-        output.put("Pt", false);
-        output.put("Pn", false);
-
-        printState();
-
-        while (!(Arrays.stream(state).map(s -> output.get(s)).distinct().count() == 1)) {
-            int agent1 = (int) (Math.random() * state.length);
-            int agent2 = (int) (Math.random() * state.length);
-
-            if (agent1 == agent2) {
-                continue;
-            }
-
-            String[] transition = transitions.get(state[agent1] + "," + state[agent2]);
-            if (transition == null) {
-                transition = transitions.get(state[agent2] + "," + state[agent1]);
-                if (transition == null) {
-                    continue;
-                }
-            }
-
-            state[agent1] = transition[0];
-            state[agent2] = transition[1];
-            printState();
-        }
-
-        if (output.get(state[0])) {
-            System.out.println("The Ninjas agreed to attack!");
+        if (args.length == 0) {
+            System.out.println("File to read from: ");
+            fileName = scanner.nextLine();
+            System.out.println("\n");
         } else {
-            System.out.println("The Ninjas did not agree to attack.");
+            fileName = args[0];
         }
+
+        try {
+            Path filePath = Paths.get(fileName);
+            lines = Files.readAllLines(filePath).toArray(String[]::new);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        PopulationProtocol pp;
+        if (lines[0] == "String") {
+            pp = PopulationProtocol.createStr(lines);
+        } else if (lines[0] == "Integer") {
+            pp = PopulationProtocol.createInt(lines);
+        } else {
+            throw new IllegalArgumentException();
+        }
+
+        while (!pp.isDone()) {
+            pp.step();
+        }
+        System.out.println(pp.getConsensus());
+    }
+}
+
+class PopulationProtocol<T> {
+    private T[] initialStates;
+    private T[] population;
+    private Function<T[], Boolean>[] transitionConditions;
+    private Function<T[], T[]>[] transitionResults;
+    private Function<T, Boolean> output;
+
+    private PopulationProtocol() {
+
     }
 
-    public static void printState() {
-        System.out.println("State: ");
-        for (String s : state) {
-            System.out.print(s + " ");
+    public static PopulationProtocol<String> createStr(String[] inputLines) {
+        PopulationProtocol<String> pp = new PopulationProtocol<>();
+        return pp;
+    }
+
+    public static PopulationProtocol<Integer> createInt(String[] inputLines) {
+        PopulationProtocol<Integer> pp = new PopulationProtocol<>();
+        return pp;
+    }
+
+    public void init(T[] population) {
+        this.population = population;
+    }
+
+    public T[] delta(T[] t) {
+        for (int i = 0; i < transitionConditions.length; i++) {
+            if (transitionConditions[i].apply(t)) {
+                return transitionResults[i].apply(t);
+            }
         }
-        System.out.println("\n");
+        return t;
+    }
+
+    public void step() {
+        int agent1 = (int) (Math.random() * population.length);
+        int agent2 = (int) (Math.random() * population.length);
+
+        while (agent1 == agent2) {
+            agent2 = (int) (Math.random() * population.length);
+        }
+
+        T[] newStates = delta(Arrays.copyOf(population, 2));
+        newStates[0] = population[agent1];
+        newStates[1] = population[agent2];
+
+        newStates = delta(newStates);
+        population[agent1] = newStates[0];
+        population[agent2] = newStates[1];
+    }
+
+    public boolean isDone() {
+        return true;
+    }
+
+    public boolean getConsensus() {
+        return true;
     }
 }
