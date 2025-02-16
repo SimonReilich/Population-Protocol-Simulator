@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Scanner;
@@ -36,9 +37,9 @@ public class Main {
 
         PopulationProtocol pp;
         if (lines[0] == "String") {
-            pp = PopulationProtocol.createStr(lines);
+            pp = PopulationProtocol.createStr(Arrays.copyOfRange(lines, 1, lines.length));
         } else if (lines[0] == "Integer") {
-            pp = PopulationProtocol.createInt(lines);
+            pp = PopulationProtocol.createInt(Arrays.copyOfRange(lines, 1, lines.length));
         } else {
             throw new IllegalArgumentException();
         }
@@ -53,8 +54,8 @@ public class Main {
 class PopulationProtocol<T> {
     private T[] initialStates;
     private T[] population;
-    private Function<T[], Boolean>[] transitionConditions;
-    private Function<T[], T[]>[] transitionResults;
+    private ArrayList<Function<T[], Boolean>> transitionConditions;
+    private ArrayList<Function<T[], T[]>> transitionResults;
     private Function<T, Boolean> output;
 
     private PopulationProtocol() {
@@ -63,22 +64,55 @@ class PopulationProtocol<T> {
 
     public static PopulationProtocol<String> createStr(String[] inputLines) {
         PopulationProtocol<String> pp = new PopulationProtocol<>();
+        pp.initialStates = Arrays.stream(inputLines[0].split(",")).map(String::strip).toArray(String[]::new);
+        int startAccept = 0;
+        for (int i = 1; i < inputLines.length; i++) {
+            if (inputLines[i].startsWith("accept")) {
+                startAccept = i;
+                break;
+            }
+            String[][] rule = Arrays.stream(inputLines[i].split("->")).map(String::strip).map(s -> Arrays.stream(s.split(",")).map(String::strip)).toArray(String[][]::new);
+            pp.transitionConditions.add(t -> t[0].equals(rule[0][0]) && t[1].equals(rule[0][1]));
+            pp.transitionResults.add(t -> new String[]{rule[1][0], rule[1][1]});
+        }
+        pp.init();
         return pp;
     }
 
     public static PopulationProtocol<Integer> createInt(String[] inputLines) {
         PopulationProtocol<Integer> pp = new PopulationProtocol<>();
+        pp.initialStates = Arrays.stream(inputLines[0].split(",")).map(Integer::valueOf).toArray(Integer[]::new);
+        int startAccept = 0;
+        for (int i = 1; i < inputLines.length; i++) {
+            if (inputLines[i].startsWith("accept")) {
+                startAccept = i;
+                break;
+            }
+            Integer[][] rule = Arrays.stream(inputLines[i].split("->")).map(String::strip).map(s -> Arrays.stream(s.split(",")).map(Integer::valueOf)).toArray(Integer[][]::new);
+            pp.transitionConditions.add(t -> t[0] == rule[0][0] && t[1] == rule[0][1]);
+            pp.transitionResults.add(t -> new Integer[]{rule[1][0], rule[1][1]});
+        }
+        pp.init();
         return pp;
     }
 
-    public void init(T[] population) {
-        this.population = population;
+    public void init() {
+        Scanner scanner = new Scanner(System.in);
+        ArrayList<T> list = new ArrayList<>();
+        for (T initialState : initialStates) {
+            System.out.println("number of agents of state" + initialState + ": ");
+            int numberOfAgents = scanner.nextInt();
+            for (int j = 0; j < numberOfAgents; j++) {
+                list.add(initialState);
+            }
+        }
+        this.population = list.toArray((T[])(new Object[list.size()]));
     }
 
     public T[] delta(T[] t) {
-        for (int i = 0; i < transitionConditions.length; i++) {
-            if (transitionConditions[i].apply(t)) {
-                return transitionResults[i].apply(t);
+        for (int i = 0; i < transitionConditions.size(); i++) {
+            if (transitionConditions.get(i).apply(t)) {
+                return transitionResults.get(i).apply(t);
             }
         }
         return t;
@@ -102,10 +136,16 @@ class PopulationProtocol<T> {
     }
 
     public boolean isDone() {
+        boolean out = getConsensus();
+        for (T t : population) {
+            if (output.apply(t) != out) {
+                return false;
+            }
+        }
         return true;
     }
 
     public boolean getConsensus() {
-        return true;
+        return output.apply(population[0]);
     }
 }
