@@ -53,8 +53,19 @@ public class PopProtoSim implements PopulationProtocol<String> {
     }
 
     @Override
-    public boolean hasConsensus(List<String> states) {
+    public boolean hasConsensus(List<String> states, boolean[] alive) {
         // prototype consensus-checking, further improvements needed
-        return states.stream().map(this::output).distinct().count() == 1;
+        Optional<Boolean> last = Optional.empty();
+
+        for (int i = 0; i < states.size(); i++) {
+            if (alive[i]) {
+                if (last.isEmpty()) {
+                    last = Optional.of(output(states.get(i)));
+                } else if (last.get() != output(states.get(i))) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }

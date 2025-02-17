@@ -10,10 +10,12 @@ import java.util.*;
 public class Main {
     private static PopProtoSim protoSim;
     private static List<String> config;
+    private static boolean[] alive;
 
     public static void main(String[] args) throws IOException, InterruptedException {
 
         // File input can be passed as a command line argument
+        System.out.println();
         BufferedReader r = new BufferedReader(new InputStreamReader(System.in));
         if (args.length < 1) {
             System.out.println("File to read from: ");
@@ -34,24 +36,57 @@ public class Main {
             }
         }
 
+        alive = new boolean[config.size()];
+        Arrays.fill(alive, true);
+
         System.out.println("Total number of agents: " + config.size());
-        System.out.println("\nFast simulation? (y/n): ");
+        System.out.println("\nMean agents killed by the sniper per round: ");
+        double snipeRate = Double.parseDouble(r.readLine());
+        System.out.println("Maximum number of snipes (-1 for no limit): ");
+        int maxSnipes = Integer.parseInt(r.readLine());
+        System.out.println("Fast simulation? (y/n): ");
         boolean fastSim = r.readLine().equals("y");
         System.out.println("\nStarting simulation...\n");
         printConfig();
+        boolean snipeInNextStep = true;
 
         // Run the simulation
-        while (!protoSim.hasConsensus(config)) {
+        while (!protoSim.hasConsensus(config, alive)) {
+
+            if (maxSnipes != 0 && snipeInNextStep) {
+                int toBeSniped = getPoissonRandom(snipeRate);
+                for (int i = 0; i < toBeSniped; i++) {
+                    int index;
+                    do {
+                        index = (int) (Math.random() * config.size());
+                    } while (!alive[index]);
+                    alive[index] = false;
+                    maxSnipes--;
+                    config.set(index, "☠");
+                    if (maxSnipes == 0) {
+                        break;
+                    }
+                }
+                if (toBeSniped > 0 && !fastSim) {
+                    Thread.sleep(1000);
+                    printConfig();
+                }
+            }
+            snipeInNextStep = true;
 
             // Pick a random pair of agents
-            int agent1 = (int) (Math.random() * config.size());
-            int agent2 = 0;
+            int agent1;
+            int agent2;
+            do {
+                agent1 = (int) (Math.random() * config.size());
+            } while (!alive[agent1]);
             do {
                 agent2 = (int) (Math.random() * config.size());
-            } while (agent1 == agent2);
+            } while (agent1 == agent2 && !alive[agent2]);
             Pair<String> newState = pickRandom(protoSim.delta(config.get(agent1), config.get(agent2)));
 
             if (newState == null) {
+                snipeInNextStep = false;
                 continue;
             }
 
@@ -77,7 +112,7 @@ public class Main {
             System.out.println("\n\nFinal configuration:\n");
         }
         printConfig();
-        System.out.println("\n\nConsensus reached!: " + protoSim.output(config.getFirst()));
+        System.out.println("\n\nConsensus reached: " + protoSim.output(config.getFirst()));
     }
 
     public static void printConfig(int... selected) {
@@ -101,7 +136,7 @@ public class Main {
         if (str.length() > len) {
             throw new RuntimeException("String too short");
         }
-        return " ".repeat((len - str.length()) / 2) + str + " ".repeat(len - str.length() - ((len - str.length()) / 2));
+        return " ".repeat((len - str.length()) / 2) + str + " ".repeat(Math.ceilDiv(len - str.length(), 2));
     }
 
     public static Pair<String> pickRandom(Set<Pair<String>> set) {
@@ -116,6 +151,18 @@ public class Main {
             i++;
         }
         return null;
+    }
+
+    // As proposed by D. Knuth (http://en.wikipedia.org/wiki/Poisson_distribution#Generating_Poisson-distributed_random_variables)
+    private static int getPoissonRandom(double mean) {
+        double L = Math.exp(-mean);
+        int k = 0;
+        double p = 1.0;
+        do {
+            p = p * Math.random();
+            k++;
+        } while (p > L);
+        return k - 1;
     }
 }
 

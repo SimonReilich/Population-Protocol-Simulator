@@ -8,5 +8,5 @@ public interface PopulationProtocol<T> {
     public Set<Pair<T>> delta (T x, T y);
     public Set<T> getI();
     public boolean output(T state);
-    public boolean hasConsensus(List<T> states);
+    public boolean hasConsensus(List<T> states, boolean[] alive);
 }
