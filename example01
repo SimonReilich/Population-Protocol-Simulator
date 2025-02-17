@@ -1,0 +1,23 @@
+Ay, An, At, Py, Pn, Pt;
+Ay, An;
+Ay, Py;
+Ay, At -> Ay, Py;
+Ay, An -> At, Pt;
+At, An -> An, Pn;
+At, At -> At, Pt;
+Ay, Pt -> Ay, Py;
+Ay, Pn -> Ay, Py;
+At, Py -> At, Pt;
+At, Pn -> At, Pt;
+An, Py -> An, Pn;
+An, Pt -> An, Pn;
+At, Ay -> Ay, Py;
+An, Ay -> At, Pt;
+An, At -> An, Pn;
+At, At -> At, Pt;
+Pt, Ay -> Ay, Py;
+Pn, Ay -> Ay, Py;
+Py, At -> At, Pt;
+Pn, At -> At, Pt;
+Py, An -> An, Pn;
+Pt, An -> An, Pn
