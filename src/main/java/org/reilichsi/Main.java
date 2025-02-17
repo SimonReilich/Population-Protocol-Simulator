@@ -37,7 +37,7 @@ public class Main {
         System.out.println("Total number of agents: " + config.size());
         System.out.println("\nFast simulation? (y/n): ");
         boolean fastSim = r.readLine().equals("y");
-        System.out.println("\nStarting simulation...");
+        System.out.println("\nStarting simulation...\n");
         printConfig();
 
         // Run the simulation
@@ -73,24 +73,27 @@ public class Main {
         }
 
         // Print the final configuration
+        if (fastSim) {
+            System.out.println("\n\nFinal configuration:\n");
+        }
         printConfig();
-        System.out.println("\nConsensus reached!: " + protoSim.output(config.getFirst()));
+        System.out.println("\n\nConsensus reached!: " + protoSim.output(config.getFirst()));
     }
 
     public static void printConfig(int... selected) {
-        StringBuilder sb = new StringBuilder("\n|");
+        StringBuilder sb = new StringBuilder("\r|");
         // len is the maximum length of the strings representing each state
         int len = config.stream().map(String::length).max(Comparator.naturalOrder()).orElse(0);
         for (int i = 0; i < config.size(); i++) {
             // finalI is necessary for lambda capture
             int finalI = i;
             if (selected != null && Arrays.stream(selected).anyMatch(s -> s == finalI)) {
-                sb.append(" * ").append(extend(config.get(i), len)).append(" * |");
+                sb.append("* ").append(extend(config.get(i), len)).append(" *|");
             } else {
-                sb.append("   ").append(extend(config.get(i), len)).append("   |");
+                sb.append("  ").append(extend(config.get(i), len)).append("  |");
             }
         }
-        System.out.println(sb);
+        System.out.print(sb);
     }
 
     public static String extend(String str, int len) {
