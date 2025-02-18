@@ -8,7 +8,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class Main {
-    private static PopProtoSim protoSim;
+    private static PopulationProtocol<String> protoSim;
     private static List<String> config;
     private static boolean[] alive;
 
@@ -40,71 +40,27 @@ public class Main {
         Arrays.fill(alive, true);
 
         System.out.println("Total number of agents: " + config.size());
-        System.out.println("\nMean agents killed by the sniper per round: ");
-        double snipeRate = Double.parseDouble(r.readLine());
-        System.out.println("Maximum number of snipes (-1 for no limit): ");
-        int maxSnipes = Integer.parseInt(r.readLine());
+        System.out.println("\nRandom sniper? (y/n):");
+        boolean randomSniper = r.readLine().equalsIgnoreCase("y");
+        double snipeRate;
+        int maxSnipes;
+        if (randomSniper) {
+            System.out.println("Mean agents killed by the sniper per round: ");
+            snipeRate = Double.parseDouble(r.readLine());
+            System.out.println("Maximum number of snipes (-1 for no limit): ");
+            maxSnipes = Integer.parseInt(r.readLine());
+        } else {
+            snipeRate = 0.0;
+            maxSnipes = 0;
+        }
         System.out.println("Fast simulation? (y/n): ");
-        boolean fastSim = r.readLine().equals("y");
+        boolean fastSim = r.readLine().equalsIgnoreCase("y");
         System.out.println("\nStarting simulation...\n");
         printConfig();
-        boolean snipeInNextStep = true;
 
         // Run the simulation
         while (!protoSim.hasConsensus(config, alive)) {
-
-            if (maxSnipes != 0 && snipeInNextStep) {
-                int toBeSniped = getPoissonRandom(snipeRate);
-                for (int i = 0; i < toBeSniped; i++) {
-                    int index;
-                    do {
-                        index = (int) (Math.random() * config.size());
-                    } while (!alive[index]);
-                    alive[index] = false;
-                    maxSnipes--;
-                    config.set(index, "☠");
-                    if (maxSnipes == 0) {
-                        break;
-                    }
-                }
-                if (toBeSniped > 0 && !fastSim) {
-                    Thread.sleep(1000);
-                    printConfig();
-                }
-            }
-            snipeInNextStep = true;
-
-            // Pick a random pair of agents
-            int agent1;
-            int agent2;
-            do {
-                agent1 = (int) (Math.random() * config.size());
-            } while (!alive[agent1]);
-            do {
-                agent2 = (int) (Math.random() * config.size());
-            } while (agent1 == agent2 && !alive[agent2]);
-            Pair<String> newState = pickRandom(protoSim.delta(config.get(agent1), config.get(agent2)));
-
-            if (newState == null) {
-                snipeInNextStep = false;
-                continue;
-            }
-
-            if (!fastSim) {
-                Thread.sleep(1000);
-                printConfig(agent1, agent2);
-                Thread.sleep(1000);
-            }
-
-            // Update the configuration
-            config.set(agent1, newState.getFirst());
-            config.set(agent2, newState.getSecond());
-
-            if (!fastSim) {
-                printConfig(agent1, agent2);
-                Thread.sleep(1000);
-                printConfig();
-            }
+            simulate(fastSim, true, maxSnipes, snipeRate);
         }
 
         // Print the final configuration
@@ -113,6 +69,60 @@ public class Main {
         }
         printConfig();
         System.out.println("\n\nConsensus reached: " + protoSim.output(config.getFirst()));
+    }
+
+    public static void simulate(boolean fastSim, boolean snipeInNextStep, int maxSnipes, double snipeRate) throws InterruptedException {
+        if (maxSnipes != 0 && snipeInNextStep) {
+            int toBeSniped = getPoissonRandom(snipeRate);
+            for (int i = 0; i < toBeSniped; i++) {
+                int index;
+                do {
+                    index = (int) (Math.random() * config.size());
+                } while (!alive[index]);
+                alive[index] = false;
+                maxSnipes--;
+                config.set(index, "☠");
+                if (maxSnipes == 0) {
+                    break;
+                }
+            }
+            if (toBeSniped > 0 && !fastSim) {
+                Thread.sleep(1000);
+                printConfig();
+            }
+        }
+
+        // Pick a random pair of agents
+        int agent1;
+        int agent2;
+        do {
+            agent1 = (int) (Math.random() * config.size());
+        } while (!alive[agent1]);
+        do {
+            agent2 = (int) (Math.random() * config.size());
+        } while (agent1 == agent2 && !alive[agent2]);
+        Pair<String> newState = pickRandom(protoSim.delta(config.get(agent1), config.get(agent2)));
+
+        if (newState == null) {
+            simulate(fastSim, false, maxSnipes, snipeRate);
+            return;
+        }
+
+        if (!fastSim) {
+            Thread.sleep(1000);
+            printConfig(agent1, agent2);
+            Thread.sleep(1000);
+        }
+
+        // Update the configuration
+        config.set(agent1, newState.getFirst());
+        config.set(agent2, newState.getSecond());
+
+        if (!fastSim) {
+            printConfig(agent1, agent2);
+            Thread.sleep(1000);
+            printConfig();
+        }
     }
 
     public static void printConfig(int... selected) {

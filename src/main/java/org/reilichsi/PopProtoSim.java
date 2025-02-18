@@ -12,15 +12,19 @@ public class PopProtoSim implements PopulationProtocol<String> {
     public PopProtoSim(String input) {
         // different parts of the input are seperated by ";"
         String[] tokens = input.replace(" ", "").replace("\n", "").replace("\r", "").split(";");
+
         // the set of states is the first line
         Q = Arrays.stream(tokens[0].split(",")).collect(Collectors.toSet());
+
         // the set of initial states is the second line
         I = Arrays.stream(tokens[1].split(",")).collect(Collectors.toSet());
         output = new HashMap<>();
+
         // the set of positive outputs Q_+ is the third line
         Arrays.stream(tokens[2].split(",")).forEach(s -> output.put(s, true));
         // (Q_- = Q \ Q_+)
         Q.forEach(s -> output.putIfAbsent(s, false));
+
         transitions = new HashMap<>();
         Q.forEach(s -> transitions.put(s, new HashMap<>()));
         for (int i = 3; i < tokens.length; i++) {
@@ -53,15 +57,15 @@ public class PopProtoSim implements PopulationProtocol<String> {
     }
 
     @Override
-    public boolean hasConsensus(List<String> states, boolean[] alive) {
+    public boolean hasConsensus(List<String> config, boolean[] alive) {
         // prototype consensus-checking, further improvements needed
         Optional<Boolean> last = Optional.empty();
 
-        for (int i = 0; i < states.size(); i++) {
+        for (int i = 0; i < config.size(); i++) {
             if (alive[i]) {
                 if (last.isEmpty()) {
-                    last = Optional.of(output(states.get(i)));
-                } else if (last.get() != output(states.get(i))) {
+                    last = Optional.of(output(config.get(i)));
+                } else if (last.get() != output(config.get(i))) {
                     return false;
                 }
             }
