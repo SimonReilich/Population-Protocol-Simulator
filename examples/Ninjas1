@@ -1,0 +1,6 @@
+Ay, An, Py, Pn;
+Ay, An;
+Ay, Py;
+Ay, An -> Pn, Pn;
+Ay, Pn -> Ay, Py;
+An, Py -> An, Pn;
