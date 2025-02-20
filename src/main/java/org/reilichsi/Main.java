@@ -60,7 +60,7 @@ public class Main {
 
         // Run the simulation
         while (!protoSim.hasConsensus(config, alive)) {
-            simulate(fastSim, true, maxSnipes, snipeRate);
+            simulationStep(fastSim, true, maxSnipes, snipeRate);
         }
 
         // Print the final configuration
@@ -71,7 +71,7 @@ public class Main {
         System.out.println("\n\nConsensus reached: " + protoSim.output(config.getFirst()));
     }
 
-    public static void simulate(boolean fastSim, boolean snipeInNextStep, int maxSnipes, double snipeRate) throws InterruptedException {
+    public static void simulationStep(boolean fastSim, boolean snipeInNextStep, int maxSnipes, double snipeRate) throws InterruptedException {
         if (maxSnipes != 0 && snipeInNextStep) {
             int toBeSniped = getPoissonRandom(snipeRate);
             for (int i = 0; i < toBeSniped; i++) {
@@ -101,10 +101,10 @@ public class Main {
         do {
             agent2 = (int) (Math.random() * config.size());
         } while (agent1 == agent2 && !alive[agent2]);
-        Pair<String> newState = pickRandom(protoSim.delta(config.get(agent1), config.get(agent2)));
+        Pair<String, String> newState = pickRandom(protoSim.delta(config.get(agent1), config.get(agent2)));
 
         if (newState == null) {
-            simulate(fastSim, false, maxSnipes, snipeRate);
+            simulationStep(fastSim, false, maxSnipes, snipeRate);
             return;
         }
 
@@ -149,12 +149,12 @@ public class Main {
         return " ".repeat((len - str.length()) / 2) + str + " ".repeat(Math.ceilDiv(len - str.length(), 2));
     }
 
-    public static Pair<String> pickRandom(Set<Pair<String>> set) {
+    public static Pair<String, String> pickRandom(Set<Pair<String, String>> set) {
         // randomly pick a pair from the set
         int index = (int) (Math.random() * set.size());
         int i = 0;
         // iterating over the elements of the set until the index is reached
-        for (Pair<String> p : set) {
+        for (Pair<String, String> p : set) {
             if (i == index) {
                 return p;
             }

@@ -1,10 +1,10 @@
 package org.reilichsi;
 
-public class Pair<T> {
+public class Pair<T, S> {
     private final T first;
-    private final T second;
+    private final S second;
 
-    public Pair(T first, T second) {
+    public Pair(T first, S second) {
         this.first = first;
         this.second = second;
     }
@@ -13,13 +13,13 @@ public class Pair<T> {
         return first;
     }
 
-    public T getSecond() {
+    public S getSecond() {
         return second;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof Pair<?> p) {
+        if (o instanceof Pair<?, ?> p) {
             return first.equals(p.first) && second.equals(p.second);
         }
         return false;
