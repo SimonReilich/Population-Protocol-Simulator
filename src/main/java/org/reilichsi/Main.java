@@ -18,7 +18,7 @@ public class Main {
         System.out.println();
         BufferedReader r = new BufferedReader(new InputStreamReader(System.in));
         if (args.length < 1) {
-            System.out.println("File to read from: ");
+            System.out.print("File to read from: ");
             args = new String[]{r.readLine()};
         }
 
@@ -28,11 +28,21 @@ public class Main {
         config = new ArrayList<>();
 
         // Prompt the user for the number of agents in each initial state
-        for (String state : initialStates) {
-            System.out.println("How many agents in state " + state + "?");
-            int count = Integer.parseInt(r.readLine());
-            for (int i = 0; i < count; i++) {
-                config.add(state);
+        if (args.length > 1 + initialStates.size()) {
+            Iterator<String> iter = initialStates.iterator();
+            for (int i = 1; i < args.length; i++) {
+                String s = iter.next();
+                for (int j = 0; j < Integer.parseInt(args[i]); j++) {
+                    config.add(s);
+                }
+            }
+        } else {
+            for (String state : initialStates) {
+                System.out.print("How many agents in state " + state + "?: ");
+                int count = Integer.parseInt(r.readLine());
+                for (int i = 0; i < count; i++) {
+                    config.add(state);
+                }
             }
         }
 
@@ -40,21 +50,37 @@ public class Main {
         Arrays.fill(alive, true);
 
         System.out.println("Total number of agents: " + config.size());
-        System.out.println("\nRandom sniper? (y/n):");
-        boolean randomSniper = r.readLine().equalsIgnoreCase("y");
+        boolean randomSniper;
+        if (args.length > 1 + initialStates.size() + 1) {
+            randomSniper = args[1 + initialStates.size()].equalsIgnoreCase("y");
+        } else {
+            System.out.print("Random sniper? (y/n): ");
+            randomSniper = r.readLine().equalsIgnoreCase("y");
+        }
         double snipeRate;
         int maxSnipes;
         if (randomSniper) {
-            System.out.println("Mean agents killed by the sniper per round: ");
-            snipeRate = Double.parseDouble(r.readLine());
-            System.out.println("Maximum number of snipes (-1 for no limit): ");
-            maxSnipes = Integer.parseInt(r.readLine());
+            if (args.length > 1 + initialStates.size() + 3) {
+                snipeRate = Double.parseDouble(args[1 + initialStates.size() + 1]);
+                maxSnipes = Integer.parseInt(args[2 + initialStates.size() + 2]);
+            } else {
+                System.out.print("Mean agents killed by the sniper per round: ");
+                snipeRate = Double.parseDouble(r.readLine());
+                System.out.print("Maximum number of snipes (-1 for no limit): ");
+                maxSnipes = Integer.parseInt(r.readLine());
+            }
         } else {
             snipeRate = 0.0;
             maxSnipes = 0;
         }
-        System.out.println("Fast simulation? (y/n): ");
-        boolean fastSim = r.readLine().equalsIgnoreCase("y");
+
+        boolean fastSim;
+        if ((randomSniper && args.length > 1 + initialStates.size() + 4) || (!randomSniper && args.length > 1 + initialStates.size() + 2)) {
+            fastSim = args[args.length - 1].equalsIgnoreCase("y");
+        } else {
+            System.out.print("Fast simulation? (y/n): ");
+            fastSim = r.readLine().equalsIgnoreCase("y");
+        }
         System.out.println("\nStarting simulation...\n");
         printConfig();
 
