@@ -94,7 +94,12 @@ public class Main {
             System.out.println("\n\nFinal configuration:\n");
         }
         printConfig();
-        System.out.println("\n\nConsensus reached: " + protoSim.output(config.getFirst()));
+        for (int i = 0; i < config.size(); i++) {
+            if (alive[i]) {
+                System.out.println("\n\nConsensus reached: " + protoSim.output(config.get(i)));
+                break;
+            }
+        }
     }
 
     public static void simulationStep(boolean fastSim, boolean snipeInNextStep, int maxSnipes, double snipeRate) throws InterruptedException {
