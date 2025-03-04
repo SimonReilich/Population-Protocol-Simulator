@@ -20,10 +20,12 @@ public class Main {
         System.out.println();
         BufferedReader r = new BufferedReader(new InputStreamReader(System.in));
         System.out.print("Protocol to simulate? (p for Pebbles, f for file): ");
+        String protocolCode = r.readLine();
 
-        if (r.readLine().equalsIgnoreCase("p")) {
+        // Initialize the protocol
+        if (protocolCode.equalsIgnoreCase("p")) {
             protocol = new Pebbles(r);
-        } else if (r.readLine().equalsIgnoreCase("f")) {
+        } else if (protocolCode.equalsIgnoreCase("f")) {
             protocol = new FileProtocol(r);
         }
 
