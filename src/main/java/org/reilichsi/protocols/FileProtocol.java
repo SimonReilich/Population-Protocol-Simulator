@@ -1,5 +1,11 @@
-package org.reilichsi;
+package org.reilichsi.protocols;
 
+import org.reilichsi.Pair;
+import org.reilichsi.Population;
+import org.reilichsi.sniper.*;
+
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -52,6 +58,22 @@ public class FileProtocol extends PopulationProtocol<String> {
     public Set<String> getI() {
         return I;
     }
+
+    @Override
+    public Population<String> initializeConfig(BufferedReader r) throws IOException {
+        Population<String> config = new Population<>();
+
+        // Prompt the user for the number of agents in each initial state
+        for (String state : I) {
+            System.out.print("How many agents in state " + state + "?: ");
+            int count = Integer.parseInt(r.readLine());
+            for (int i = 0; i < count; i++) {
+                config.add(state);
+            }
+        }
+        return config;
+    }
+
 
     @Override
     public boolean output(String state) {

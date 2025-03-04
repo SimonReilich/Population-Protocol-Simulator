@@ -2,8 +2,9 @@ package org.reilichsi;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
-public class Population<T extends Comparable<T>> {
+public class Population<T> {
 
     private final List<T> population;
     private final List<Boolean> active;
@@ -20,14 +21,14 @@ public class Population<T extends Comparable<T>> {
     }
 
     public int count(T t) {
-        return (int) population.stream().filter(s -> s.compareTo(t) == 0).count();
+        return (int) population.stream().filter(s -> s == t).count();
     }
 
     public int countActive(T t) {
         int count = 0;
         for (int i = 0; i < population.size(); i++) {
-            if (population.get(i).compareTo(t) == 0) {
-                count += active.get(i) ? 1 : 0;
+            if (population.get(i) == t && active.get(i)) {
+                count += 1;
             }
         }
         return count;
@@ -46,7 +47,7 @@ public class Population<T extends Comparable<T>> {
         Arrays.fill(visited, false);
         for (T s : states) {
             for (int i = 0; i < population.size(); i++) {
-                if (population.get(i).compareTo(s) == 0 && !visited[i] && active.get(i)) {
+                if (population.get(i) == s && !visited[i] && active.get(i)) {
                     visited[i] = true;
                     break;
                 }
@@ -70,15 +71,6 @@ public class Population<T extends Comparable<T>> {
 
     public void kill(int pos) {
         active.set(pos, false);
-    }
-
-    public Optional<Boolean> consensus(Function<T, Boolean> function) {
-        List<Boolean> output = population.stream().map(function).distinct().toList();
-        if (output.size() == 2) {
-            return Optional.empty();
-        } else {
-            return Optional.of(output.getFirst());
-        }
     }
 
     private String toStringArgs(Integer... selected) {
@@ -128,5 +120,15 @@ public class Population<T extends Comparable<T>> {
             return true;
         }
         return false;
+    }
+
+    public Stream<T> stream() {
+        List<T> list = new ArrayList<>();
+        for (int i = 0; i < population.size(); i++) {
+            if (active.get(i)) {
+                list.add(population.get(i));
+            }
+        }
+        return list.stream();
     }
 }
