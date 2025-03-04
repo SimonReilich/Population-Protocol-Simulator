@@ -6,6 +6,8 @@ import org.reilichsi.sniper.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -15,11 +17,12 @@ public class FileProtocol extends PopulationProtocol<String> {
     private final Set<String> I;
     private final Map<String, Boolean> output;
 
-    public FileProtocol(String input) {
+    public FileProtocol(BufferedReader r) throws IOException {
         super();
 
+        System.out.print("File to read from: ");
         // different parts of the input are seperated by ";"
-        String[] tokens = input.replace(" ", "").replace("\n", "").replace("\r", "").split(";");
+        String[] tokens = Files.readString(Path.of(r.readLine())).replace(" ", "").replace("\n", "").replace("\r", "").split(";");
 
         // the set of states is the first line
         Q = Arrays.stream(tokens[0].split(",")).collect(Collectors.toSet());
@@ -78,5 +81,14 @@ public class FileProtocol extends PopulationProtocol<String> {
     @Override
     public boolean output(String state) {
         return output.getOrDefault(state, false);
+    }
+
+    @Override
+    public Optional<Boolean> consensus(Population<String> config) {
+        if (config.stream().map(this::output).distinct().count() > 1) {
+            return Optional.empty();
+        } else {
+            return config.stream().map(this::output).findFirst();
+        }
     }
 }

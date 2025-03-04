@@ -19,12 +19,15 @@ public class Main {
 
         System.out.println();
         BufferedReader r = new BufferedReader(new InputStreamReader(System.in));
-        System.out.print("File to read from: ");
+        System.out.print("Protocol to simulate? (p for Pebbles, f for file): ");
 
-        // Initialize the simulation with the content of the file
-        protocol = new FileProtocol(Files.readString(Path.of(r.readLine())));
+        if (r.readLine().equalsIgnoreCase("p")) {
+            protocol = new Pebbles(r);
+        } else if (r.readLine().equalsIgnoreCase("f")) {
+            protocol = new FileProtocol(r);
+        }
+
         config = protocol.initializeConfig(r);
-
         sniper = protocol.initializeSniper(r);
 
         boolean fastSim;
@@ -37,7 +40,7 @@ public class Main {
         // Run the simulation
         boolean snipeInNextStep = true;
         while (protocol.consensus(config).isEmpty()) {
-            snipeInNextStep = simulationStep(fastSim, true);
+            snipeInNextStep = simulationStep(fastSim, snipeInNextStep);
         }
 
         // Print the final configuration

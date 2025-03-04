@@ -2,27 +2,20 @@ package org.reilichsi.sniper;
 
 import org.reilichsi.Population;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+
 public class RandomSniper<T> extends Sniper<T> {
 
     private int maxSnipes;
     private double snipeRate;
 
-    public RandomSniper() {
+    public RandomSniper(BufferedReader r) throws IOException {
         super();
-    }
-
-    public RandomSniper(int maxSnipes, double snipeRate) {
-        super();
-        this.maxSnipes = maxSnipes;
-        this.snipeRate = snipeRate;
-    }
-
-    public void setMaxSnipes(int maxSnipes) {
-        this.maxSnipes = maxSnipes;
-    }
-
-    public void setSnipeRate(double snipeRate) {
-        this.snipeRate = snipeRate;
+        System.out.print("Mean agents killed by the sniper per round: ");
+        snipeRate = Double.parseDouble(r.readLine());
+        System.out.print("Maximum number of snipes (-1 for no limit): ");
+        maxSnipes = Integer.parseInt(r.readLine());
     }
 
     @Override
