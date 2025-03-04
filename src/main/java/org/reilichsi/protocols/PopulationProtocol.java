@@ -16,9 +16,12 @@ public abstract class PopulationProtocol<T> {
     public abstract Population<T> initializeConfig(BufferedReader r) throws IOException;
 
     public Sniper<T> initializeSniper(BufferedReader r) throws IOException {
-        System.out.print("Random sniper? (y/n): ");
-        if (r.readLine().equalsIgnoreCase("y")) {
+        System.out.print("Kind of sniper? (r for random, p for percise, n for none): ");
+        String sniperCode = r.readLine();
+        if (sniperCode.equalsIgnoreCase("y")) {
             return new RandomSniper<>(r);
+        } else if (sniperCode.equalsIgnoreCase("p")) {
+            return new PerciseSniper<>(r, this);
         } else {
             return new NoSniper<>();
         }
@@ -26,4 +29,6 @@ public abstract class PopulationProtocol<T> {
     public abstract boolean output(T state);
 
     public abstract Optional<Boolean> consensus(Population<T> config);
+
+    public abstract T stateFromString(String s);
 }

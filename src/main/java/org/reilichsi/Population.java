@@ -73,6 +73,16 @@ public class Population<T> {
         active.set(pos, false);
     }
 
+    public boolean killState(T state) {
+        for (int i = 0; i < population.size(); i++) {
+            if (population.get(i) == state && active.get(i)) {
+                active.set(i, false);
+                return true;
+            }
+        }
+        return false;
+    }
+
     private String toStringArgs(Integer... selected) {
         StringBuilder sb = new StringBuilder();
         sb.append("|");

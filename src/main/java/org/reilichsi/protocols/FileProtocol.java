@@ -91,4 +91,9 @@ public class FileProtocol extends PopulationProtocol<String> {
             return config.stream().map(this::output).findFirst();
         }
     }
+
+    @Override
+    public String stateFromString(String s) {
+        return s;
+    }
 }

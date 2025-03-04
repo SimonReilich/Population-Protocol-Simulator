@@ -78,4 +78,16 @@ public class Pebbles extends PopulationProtocol<Integer> {
             return Optional.of(false);
         }
     }
+
+    @Override
+    public Integer stateFromString(String s) {
+        int state = Integer.parseInt(s);
+        if (state < 0 || state > t) {
+            throw new IllegalArgumentException("Invalid state: " + s + ". Must be between 0 and " + t);
+        } else {
+            return state;
+        }
+    }
+
+
 }
