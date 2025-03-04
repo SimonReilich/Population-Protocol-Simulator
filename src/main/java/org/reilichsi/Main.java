@@ -8,9 +8,8 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class Main {
-    private static PopulationProtocol<String> protoSim;
-    private static List<String> config;
-    private static boolean[] alive;
+    private static PopulationProtocol<String> protocol;
+    private static Population<String> config;
 
     public static void main(String[] args) throws IOException, InterruptedException {
 
@@ -23,9 +22,9 @@ public class Main {
         }
 
         // Initialize the simulation with the content of the file
-        protoSim = new PopProtoSim(Files.readString(Path.of(args[0])));
-        Set<String> initialStates = protoSim.getI();
-        config = new ArrayList<>();
+        protocol = new FileProtocol(Files.readString(Path.of(args[0])));
+        Set<String> initialStates = protocol.getI();
+        config = new Population<>();
 
         // Prompt the user for the number of agents in each initial state
         if (args.length > 1 + initialStates.size()) {
@@ -46,10 +45,6 @@ public class Main {
             }
         }
 
-        alive = new boolean[config.size()];
-        Arrays.fill(alive, true);
-
-        System.out.println("Total number of agents: " + config.size());
         boolean randomSniper;
         if (args.length > 1 + initialStates.size() + 1) {
             randomSniper = args[1 + initialStates.size()].equalsIgnoreCase("y");
@@ -74,6 +69,10 @@ public class Main {
             maxSnipes = 0;
         }
 
+        if (maxSnipes >= config.size()) {
+            maxSnipes = config.size() - 1;
+        }
+
         boolean fastSim;
         if ((randomSniper && args.length > 1 + initialStates.size() + 4) || (!randomSniper && args.length > 1 + initialStates.size() + 2)) {
             fastSim = args[args.length - 1].equalsIgnoreCase("y");
@@ -82,44 +81,38 @@ public class Main {
             fastSim = r.readLine().equalsIgnoreCase("y");
         }
         System.out.println("\nStarting simulation...\n");
-        printConfig();
+        System.out.print(config.toString());
 
         // Run the simulation
-        while (!protoSim.hasConsensus(config, alive)) {
-            simulationStep(fastSim, true, maxSnipes, snipeRate);
+        while (!protocol.hasConsensus(config)) {
+            maxSnipes = simulationStep(fastSim, true, maxSnipes, snipeRate);
         }
 
         // Print the final configuration
         if (fastSim) {
             System.out.println("\n\nFinal configuration:\n");
         }
-        printConfig();
-        for (int i = 0; i < config.size(); i++) {
-            if (alive[i]) {
-                System.out.println("\n\nConsensus reached: " + protoSim.output(config.get(i)));
-                break;
-            }
-        }
+        System.out.println("\r" + config.toString());
+        System.out.println("\nConsensus reached: " + config.consensus(s -> protocol.output(s)).get());
     }
 
-    public static void simulationStep(boolean fastSim, boolean snipeInNextStep, int maxSnipes, double snipeRate) throws InterruptedException {
+    public static int simulationStep(boolean fastSim, boolean snipeInNextStep, int maxSnipes, double snipeRate) throws InterruptedException {
         if (maxSnipes != 0 && snipeInNextStep) {
             int toBeSniped = getPoissonRandom(snipeRate);
             for (int i = 0; i < toBeSniped; i++) {
                 int index;
                 do {
                     index = (int) (Math.random() * config.size());
-                } while (!alive[index]);
-                alive[index] = false;
+                } while (!config.isActive(index));
+                config.kill(index);
                 maxSnipes--;
-                config.set(index, "☠");
                 if (maxSnipes == 0) {
                     break;
                 }
             }
             if (toBeSniped > 0 && !fastSim) {
                 Thread.sleep(1000);
-                printConfig();
+                System.out.print("\r" + config.toString());
             }
         }
 
@@ -128,20 +121,20 @@ public class Main {
         int agent2;
         do {
             agent1 = (int) (Math.random() * config.size());
-        } while (!alive[agent1]);
+        } while (!config.isActive(agent1));
         do {
             agent2 = (int) (Math.random() * config.size());
-        } while (agent1 == agent2 && !alive[agent2]);
-        Pair<String, String> newState = pickRandom(protoSim.delta(config.get(agent1), config.get(agent2)));
+        } while (agent1 == agent2 || !config.isActive(agent1));
+        Pair<String, String> newState = pickRandom(protocol.delta(config.get(agent1), config.get(agent2)));
 
         if (newState == null) {
-            simulationStep(fastSim, false, maxSnipes, snipeRate);
-            return;
+            maxSnipes = simulationStep(fastSim, false, maxSnipes, snipeRate);
+            return maxSnipes;
         }
 
         if (!fastSim) {
             Thread.sleep(1000);
-            printConfig(agent1, agent2);
+            System.out.print("\r" + config.toString(agent1, agent2));
             Thread.sleep(1000);
         }
 
@@ -150,34 +143,12 @@ public class Main {
         config.set(agent2, newState.getSecond());
 
         if (!fastSim) {
-            printConfig(agent1, agent2);
+            System.out.print("\r" + config.toString(agent1, agent2));
             Thread.sleep(1000);
-            printConfig();
+            System.out.print("\r" + config.toString());
         }
-    }
 
-    public static void printConfig(int... selected) {
-        StringBuilder sb = new StringBuilder("\r|");
-        // len is the maximum length of the strings representing each state
-        int len = config.stream().map(String::length).max(Comparator.naturalOrder()).orElse(0);
-        for (int i = 0; i < config.size(); i++) {
-            // finalI is necessary for lambda capture
-            int finalI = i;
-            if (selected != null && Arrays.stream(selected).anyMatch(s -> s == finalI)) {
-                sb.append("* ").append(extend(config.get(i), len)).append(" *|");
-            } else {
-                sb.append("  ").append(extend(config.get(i), len)).append("  |");
-            }
-        }
-        System.out.print(sb);
-    }
-
-    public static String extend(String str, int len) {
-        // extending the string to length len with blanks equally distributed at beginning and end
-        if (str.length() > len) {
-            throw new RuntimeException("String too short");
-        }
-        return " ".repeat((len - str.length()) / 2) + str + " ".repeat(Math.ceilDiv(len - str.length(), 2));
+        return maxSnipes;
     }
 
     public static Pair<String, String> pickRandom(Set<Pair<String, String>> set) {
