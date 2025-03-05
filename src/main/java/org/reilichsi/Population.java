@@ -13,6 +13,9 @@ public class Population<T> {
         population = new ArrayList<>();
         population.addAll(Arrays.asList(input));
         active = new ArrayList<>();
+        for (int i = 0; i < input.length; i++) {
+            active.add(true);
+        }
     }
 
     public void add(T state) {

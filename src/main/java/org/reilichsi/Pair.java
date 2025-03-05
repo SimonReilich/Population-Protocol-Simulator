@@ -24,4 +24,9 @@ public class Pair<T, S> {
         }
         return false;
     }
+
+    @Override
+    public String toString() {
+        return "(" + first + "; " + second + ")";
+    }
 }

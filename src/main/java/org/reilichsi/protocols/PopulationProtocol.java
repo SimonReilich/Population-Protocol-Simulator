@@ -10,6 +10,23 @@ import java.util.*;
 
 public abstract class PopulationProtocol<T> {
 
+    public static PopulationProtocol getProtocol(BufferedReader r) throws IOException {
+        System.out.print("Protocol to simulate? (p for Pebbles, f for file, a for and, n for negation): ");
+        String protocolCode = r.readLine();
+
+        // Initialize the protocol
+        if (protocolCode.equalsIgnoreCase("p")) {
+            return new Pebbles(r);
+        } else if (protocolCode.equalsIgnoreCase("f")) {
+            return new FileProtocol(r);
+        } else if (protocolCode.equalsIgnoreCase("a")) {
+            return new AndProtocol(r);
+        } else if (protocolCode.equalsIgnoreCase("n")) {
+            return new NotProtocol(r);
+        }
+        return null;
+    }
+
     public abstract Set<T> getQ();
     public abstract Set<Pair<T, T>> delta (T x, T y);
     public abstract Set<T> getI();

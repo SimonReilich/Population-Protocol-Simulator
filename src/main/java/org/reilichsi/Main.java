@@ -17,16 +17,9 @@ public class Main {
 
         System.out.println();
         BufferedReader r = new BufferedReader(new InputStreamReader(System.in));
-        System.out.print("Protocol to simulate? (p for Pebbles, f for file): ");
-        String protocolCode = r.readLine();
 
-        // Initialize the protocol
-        if (protocolCode.equalsIgnoreCase("p")) {
-            protocol = new Pebbles(r);
-        } else if (protocolCode.equalsIgnoreCase("f")) {
-            protocol = new FileProtocol(r);
-        }
-
+        protocol = PopulationProtocol.getProtocol(r);
+        assert protocol != null;
         config = protocol.initializeConfig(r);
         sniper = protocol.initializeSniper(r);
 
