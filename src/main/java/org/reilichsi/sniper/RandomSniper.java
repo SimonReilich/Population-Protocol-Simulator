@@ -19,10 +19,12 @@ public class RandomSniper<T> extends Sniper<T> {
     }
 
     @Override
-    public void snipe(Population<T> config, boolean fastSim) throws InterruptedException {
+    public boolean snipe(Population<T> config, boolean fastSim) throws InterruptedException {
         if (maxSnipes >= config.sizeActive()) {
             maxSnipes = config.sizeActive() - 1;
         }
+
+        boolean out = false;
 
         if (maxSnipes != 0) {
             int toBeSniped = getPoissonRandom(snipeRate);
@@ -32,6 +34,7 @@ public class RandomSniper<T> extends Sniper<T> {
                     index = (int) (Math.random() * config.size());
                 } while (!config.isActive(index));
                 config.kill(index);
+                out = true;
                 maxSnipes--;
                 if (maxSnipes == 0) {
                     break;
@@ -42,6 +45,7 @@ public class RandomSniper<T> extends Sniper<T> {
                 System.out.print("\r" + config.toString());
             }
         }
+        return out;
     }
 
     // As proposed by D. Knuth (http://en.wikipedia.org/wiki/Poisson_distribution#Generating_Poisson-distributed_random_variables)

@@ -33,12 +33,14 @@ public abstract class PopulationProtocol<T> {
     public abstract Population<T> initializeConfig(BufferedReader r) throws IOException;
 
     public Sniper<T> initializeSniper(BufferedReader r) throws IOException {
-        System.out.print("Kind of sniper? (r for random, p for percise, n for none): ");
+        System.out.print("Kind of sniper? (r for random, p for percise, m for multi, n for none): ");
         String sniperCode = r.readLine();
         if (sniperCode.equalsIgnoreCase("y")) {
             return new RandomSniper<>(r);
         } else if (sniperCode.equalsIgnoreCase("p")) {
             return new PerciseSniper<>(r, this);
+        } else if (sniperCode.equalsIgnoreCase("m")) {
+            return new MultiSniper<>(r, this);
         } else {
             return new NoSniper<>();
         }

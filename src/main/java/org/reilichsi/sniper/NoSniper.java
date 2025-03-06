@@ -9,7 +9,7 @@ public class NoSniper<T> extends Sniper<T>{
     }
 
     @Override
-    public void snipe(Population<T> config, boolean fastSim) throws InterruptedException {
-        return;
+    public boolean snipe(Population<T> config, boolean fastSim) throws InterruptedException {
+        return false;
     }
 }

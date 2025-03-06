@@ -20,14 +20,17 @@ public class PerciseSniper<T> extends Sniper<T> {
     }
 
     @Override
-    public void snipe(Population<T> config, boolean fastSim) throws InterruptedException {
+    public boolean snipe(Population<T> config, boolean fastSim) throws InterruptedException {
 
         if (maxSnipes >= config.sizeActive()) {
             maxSnipes = config.sizeActive() - 1;
         }
 
+        boolean out = false;
         while (maxSnipes != 0 &&config.killState(target)) {
             maxSnipes--;
+            out = true;
         }
+        return out;
     }
 }
