@@ -103,7 +103,7 @@ public class AndProtocol extends PopulationProtocol<Pair<Object, Object>> {
             String first = s.substring(1, i).trim();
             String second = s.substring(i + 2, s.length() - 1).trim();
             if (countChar(first, '(') - countChar(first, ')') == 0 && countChar(second, '(') - countChar(second, ')') == 0) {
-                return new Pair<>(first, second);
+                return new Pair<>(protocol1.stateFromString(first), protocol2.stateFromString(second));
             }
         }
         throw new IllegalArgumentException("Invalid state: " + s);

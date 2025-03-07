@@ -11,7 +11,7 @@ import java.util.*;
 public abstract class PopulationProtocol<T> {
 
     public static PopulationProtocol getProtocol(BufferedReader r) throws IOException {
-        System.out.print("Protocol to simulate? (p for Pebbles, t for Tower, f for file, a for and, n for negation): ");
+        System.out.print("Protocol to simulate? (p for Pebbles, t for Tower, i for InhomTower, f for file, a for and, n for negation): ");
         String protocolCode = r.readLine();
 
         // Initialize the protocol
@@ -19,6 +19,8 @@ public abstract class PopulationProtocol<T> {
             return new Pebbles(r);
         } else if (protocolCode.equalsIgnoreCase("t")) {
             return new Tower(r);
+        } else if (protocolCode.equalsIgnoreCase("i")) {
+            return new InhomTower(r);
         } else if (protocolCode.equalsIgnoreCase("f")) {
             return new FileProtocol(r);
         } else if (protocolCode.equalsIgnoreCase("a")) {
