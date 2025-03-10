@@ -11,12 +11,14 @@ import java.util.*;
 public abstract class WeakProtocol<T> {
 
     public static WeakProtocol getWeakProtocol(BufferedReader r) throws IOException {
-        System.out.print("Weak Protocol to simulate? (g for GenMajority): ");
+        System.out.print("Weak Protocol to simulate? (g for GenMajority, i for InhomTowerCancle): ");
         String protocolCode = r.readLine();
 
         // Initialize the protocol
         if (protocolCode.equalsIgnoreCase("g")) {
             return new GenMajority(r);
+        } else if (protocolCode.equalsIgnoreCase("i")) {
+            return new InhomTowerCancle(r);
         }
 
         return null;

@@ -15,7 +15,6 @@ public class InhomTower extends PopulationProtocol<Pair<Integer, Integer>> {
     private int t;
 
     public InhomTower(BufferedReader r) throws IOException {
-        super();
         System.out.print("threshold t: ");
         t = Integer.parseInt(r.readLine());
         System.out.print("How many factors?: ");
