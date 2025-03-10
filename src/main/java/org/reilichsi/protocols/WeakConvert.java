@@ -2,6 +2,7 @@ package org.reilichsi.protocols;
 
 import org.reilichsi.Pair;
 import org.reilichsi.Population;
+import org.reilichsi.Helper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,8 +11,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-// TODO: weak convert, currently not working
 
 public class WeakConvert extends PopulationProtocol<Pair<Object, Boolean>> {
 
@@ -66,23 +65,13 @@ public class WeakConvert extends PopulationProtocol<Pair<Object, Boolean>> {
         return weakProtocol.consensus(weakPop);
     }
 
-    private static int countChar(String s, char c) {
-        int count = 0;
-        for (int i = 0; i < s.length(); i++) {
-            if (s.charAt(i) == c) {
-                count++;
-            }
-        }
-        return count;
-    }
-
     @Override
     public Pair<Object, Boolean> stateFromString(String s) {
         s = s.trim();
         for (int i = s.indexOf(';'); i < s.length(); i++) {
             String first = s.substring(1, i).trim();
             String second = s.substring(i + 2, s.length() - 1).trim();
-            if (countChar(first, '(') - countChar(first, ')') == 0 && countChar(second, '(') - countChar(second, ')') == 0) {
+            if (Helper.countChar(first, '(') - Helper.countChar(first, ')') == 0 && Helper.countChar(second, '(') - Helper.countChar(second, ')') == 0) {
                 return new Pair<>(weakProtocol.stateFromString(first), Boolean.parseBoolean(second));
             }
         }

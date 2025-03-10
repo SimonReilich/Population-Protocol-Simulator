@@ -50,7 +50,7 @@ public abstract class PopulationProtocol<T> {
         } else if (sniperCode.equalsIgnoreCase("m")) {
             return new MultiSniper<>(r, this);
         } else if (sniperCode.equalsIgnoreCase("s")) {
-            return new StackedSniper<>(r, this);
+            return new ConditionalSniper<>(r, this);
         } else {
             return new NoSniper<>();
         }

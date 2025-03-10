@@ -58,7 +58,7 @@ public class Main {
         do {
             agent2 = (int) (Math.random() * config.size());
         } while (agent1 == agent2 || !config.isActive(agent2));
-        Pair<String, String> newState = pickRandomPair(protocol.delta(config.get(agent1), config.get(agent2)));
+        Pair<String, String> newState = Helper.pickRandomPair(protocol.delta(config.get(agent1), config.get(agent2)));
 
         if (newState == null) {
             return false;
@@ -81,20 +81,6 @@ public class Main {
         }
 
         return true;
-    }
-
-    public static Pair<String, String> pickRandomPair(Set<Pair<String, String>> set) {
-        // randomly pick a pair from the set
-        int index = (int) (Math.random() * set.size());
-        int i = 0;
-        // iterating over the elements of the set until the index is reached
-        for (Pair<String, String> p : set) {
-            if (i == index) {
-                return p;
-            }
-            i++;
-        }
-        return null;
     }
 }
 

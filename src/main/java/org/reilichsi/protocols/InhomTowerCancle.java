@@ -2,6 +2,7 @@ package org.reilichsi.protocols;
 
 import org.reilichsi.Pair;
 import org.reilichsi.Population;
+import org.reilichsi.Helper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -109,16 +110,6 @@ public class InhomTowerCancle extends WeakProtocol<Object> {
         return Optional.of(true);
     }
 
-    private static int countChar(String s, char c) {
-        int count = 0;
-        for (int i = 0; i < s.length(); i++) {
-            if (s.charAt(i) == c) {
-                count++;
-            }
-        }
-        return count;
-    }
-
     @Override
     public Object stateFromString(String s) {
         try {
@@ -128,7 +119,7 @@ public class InhomTowerCancle extends WeakProtocol<Object> {
             for (int i = s.indexOf(';'); i < s.length(); i++) {
                 String first = s.substring(1, i).trim();
                 String second = s.substring(i + 2, s.length() - 1).trim();
-                if (countChar(first, '(') - countChar(first, ')') == 0 && countChar(second, '(') - countChar(second, ')') == 0) {
+                if (Helper.countChar(first, '(') - Helper.countChar(first, ')') == 0 && Helper.countChar(second, '(') - Helper.countChar(second, ')') == 0) {
                     return new Pair<>(Integer.parseInt(first), Integer.parseInt(second));
                 }
             }
