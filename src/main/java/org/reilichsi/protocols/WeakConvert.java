@@ -58,7 +58,13 @@ public class WeakConvert extends PopulationProtocol<Pair<Object, Boolean>> {
 
     @Override
     public Optional<Boolean> consensus(Population<Pair<Object, Boolean>> config) {
-        return weakProtocol.consensus(new Population(config.stream().map(Pair::getFirst).collect(Collectors.toList()).toArray(Object[]::new)));
+        if (config.stream().noneMatch(Pair::getSecond)) {
+            return Optional.of(false);
+        } else if (config.stream().allMatch(Pair::getSecond)) {
+            return Optional.of(true);
+        } else {
+            return Optional.empty();
+        }
     }
 
     private static int countChar(String s, char c) {

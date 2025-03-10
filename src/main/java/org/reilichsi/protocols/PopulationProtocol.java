@@ -30,8 +30,7 @@ public abstract class PopulationProtocol<T> {
         } else if (protocolCode.equalsIgnoreCase("n")) {
             return new NotProtocol(r);
         } else if (protocolCode.equalsIgnoreCase("w")) {
-            //return new WeakConvert(r);
-            return null;
+            return new WeakConvert(r);
         }
         return null;
     }

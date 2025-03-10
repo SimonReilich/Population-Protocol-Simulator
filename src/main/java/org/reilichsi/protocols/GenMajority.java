@@ -36,6 +36,9 @@ public class GenMajority extends WeakProtocol<Integer>{
 
     @Override
     public Set<Pair<Integer, Integer>> delta(Integer x, Integer y) {
+        if (x < 0 && 0 < y) {
+            return Set.of(new Pair<>(x + y, 0));
+        }
         return Set.of();
     }
 
@@ -63,12 +66,24 @@ public class GenMajority extends WeakProtocol<Integer>{
 
     @Override
     public Optional<Boolean> output(Integer state) {
-        return Optional.empty();
+        if (state == 0) {
+            return Optional.empty();
+        } else if (state > 0) {
+            return Optional.of(true);
+        } else {
+            return Optional.of(false);
+        }
     }
 
     @Override
     public Optional<Boolean> consensus(Population<Integer> config) {
-        return Optional.empty();
+        if (config.stream().noneMatch(s -> output(s).isPresent() && output(s).get())) {
+            return Optional.of(false);
+        } else if (config.stream().noneMatch(s -> output(s).isPresent() && !output(s).get())) {
+            return Optional.of(true);
+        } else {
+            return Optional.empty();
+        }
     }
 
     @Override
