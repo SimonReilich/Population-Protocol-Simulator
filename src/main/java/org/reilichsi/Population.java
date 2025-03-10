@@ -18,6 +18,15 @@ public class Population<T> {
         }
     }
 
+    public Population(Set<T> input) {
+        population = new ArrayList<>();
+        population.addAll(input);
+        active = new ArrayList<>();
+        for (int i = 0; i < input.size(); i++) {
+            active.add(true);
+        }
+    }
+
     public void add(T state) {
         population.add(state);
         active.add(true);

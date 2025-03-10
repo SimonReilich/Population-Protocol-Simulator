@@ -1,5 +1,6 @@
 package org.reilichsi.protocols;
 
+import org.reilichsi.Main;
 import org.reilichsi.Pair;
 import org.reilichsi.Population;
 
@@ -15,7 +16,7 @@ public class NotProtocol extends PopulationProtocol<Object> {
     public NotProtocol(BufferedReader r) throws IOException {
         super();
         System.out.println("Pick a protocol to negate: ");
-        protocol = PopulationProtocol.getProtocol(r);
+        protocol = Main.getProtocol(r);
     }
 
     @Override
@@ -34,8 +35,8 @@ public class NotProtocol extends PopulationProtocol<Object> {
     }
 
     @Override
-    public Population<Object> initializeConfig(BufferedReader r) throws IOException {
-        return protocol.initializeConfig(r);
+    public Population<Object> configFactory(BufferedReader r) throws IOException {
+        return protocol.configFactory(r);
     }
 
     @Override

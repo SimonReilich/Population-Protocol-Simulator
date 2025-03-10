@@ -6,7 +6,6 @@ import org.reilichsi.sniper.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.*;
 
 public class Main {
     private static PopulationProtocol protocol;
@@ -18,9 +17,9 @@ public class Main {
         System.out.println();
         BufferedReader r = new BufferedReader(new InputStreamReader(System.in));
 
-        protocol = PopulationProtocol.getProtocol(r);
+        protocol = getProtocol(r);
         assert protocol != null;
-        config = protocol.initializeConfig(r);
+        config = protocol.configFactory(r);
         sniper = protocol.initializeSniper(r);
 
         boolean fastSim;
@@ -81,6 +80,45 @@ public class Main {
         }
 
         return true;
+    }
+
+    public static PopulationProtocol getProtocol(BufferedReader r) throws IOException {
+        System.out.print("Protocol to simulate? (p for Pebbles, t for Tower, i for InhomTower, s for SignedNumbers, f for file, a for and, n for negation, w for WeakConvert): ");
+        String protocolCode = r.readLine();
+
+        // Initialize the protocol
+        if (protocolCode.equalsIgnoreCase("p")) {
+            return new Pebbles(r);
+        } else if (protocolCode.equalsIgnoreCase("t")) {
+            return new Tower(r);
+        } else if (protocolCode.equalsIgnoreCase("i")) {
+            return new InhomTower(r);
+        } else if (protocolCode.equalsIgnoreCase("s")) {
+            return new SignedNumbers();
+        } else if (protocolCode.equalsIgnoreCase("f")) {
+            return new FileProtocol(r);
+        } else if (protocolCode.equalsIgnoreCase("a")) {
+            return new AndProtocol(r);
+        } else if (protocolCode.equalsIgnoreCase("n")) {
+            return new NotProtocol(r);
+        } else if (protocolCode.equalsIgnoreCase("w")) {
+            return new WeakConvert(r);
+        }
+        return null;
+    }
+
+    public static WeakProtocol getWeakProtocol(BufferedReader r) throws IOException {
+        System.out.print("Weak Protocol to simulate? (g for GenMajority, i for InhomTowerCancle): ");
+        String protocolCode = r.readLine();
+
+        // Initialize the protocol
+        if (protocolCode.equalsIgnoreCase("g")) {
+            return new GenMajority(r);
+        } else if (protocolCode.equalsIgnoreCase("i")) {
+            return new InhomTowerCancle(r);
+        }
+
+        return null;
     }
 }
 

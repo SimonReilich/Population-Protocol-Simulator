@@ -44,7 +44,7 @@ public class Tower extends PopulationProtocol<Integer> {
     }
 
     @Override
-    public Population<Integer> initializeConfig(BufferedReader r) throws IOException {
+    public Population<Integer> configFactory(BufferedReader r) throws IOException {
         Population<Integer> config = new Population<>();
 
         // Prompt the user for the number of agents in initial state

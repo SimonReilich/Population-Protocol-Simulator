@@ -1,5 +1,6 @@
 package org.reilichsi.protocols;
 
+import org.reilichsi.Main;
 import org.reilichsi.Pair;
 import org.reilichsi.Population;
 
@@ -18,9 +19,9 @@ public class OrProtocol extends PopulationProtocol<Pair<Object, Object>> {
     public OrProtocol(BufferedReader r) throws IOException {
         super();
         System.out.println("Pick first protocol for disjunction: ");
-        protocol1 = PopulationProtocol.getProtocol(r);
+        protocol1 = Main.getProtocol(r);
         System.out.println("Pick second protocol for disjunction: ");
-        protocol2 = PopulationProtocol.getProtocol(r);
+        protocol2 = Main.getProtocol(r);
     }
 
     @Override
@@ -56,7 +57,7 @@ public class OrProtocol extends PopulationProtocol<Pair<Object, Object>> {
     }
 
     @Override
-    public Population<Pair<Object, Object>> initializeConfig(BufferedReader r) throws IOException {
+    public Population<Pair<Object, Object>> configFactory(BufferedReader r) throws IOException {
         Population<Pair<Object, Object>> config = new Population<>();
 
         // Prompt the user for the number of agents in each initial state

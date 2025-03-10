@@ -27,7 +27,7 @@ public class PerciseSniper<T> extends Sniper<T> {
         }
 
         boolean out = false;
-        while (maxSnipes != 0 &&config.killState(target)) {
+        while (maxSnipes != 0 && config.killState(target)) {
             maxSnipes--;
             out = true;
         }

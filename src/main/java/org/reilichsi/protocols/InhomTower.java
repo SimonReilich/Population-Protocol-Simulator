@@ -58,7 +58,7 @@ public class InhomTower extends PopulationProtocol<Pair<Integer, Integer>> {
     }
 
     @Override
-    public Population<Pair<Integer, Integer>> initializeConfig(BufferedReader r) throws IOException {
+    public Population<Pair<Integer, Integer>> configFactory(BufferedReader r) throws IOException {
         Population<Pair<Integer, Integer>> config = new Population<>();
         for (int i = 0; i < a.length; i++) {
             System.out.print("factor for skalar " + a[i] + ": ");

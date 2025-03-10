@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-public class GenMajority extends WeakProtocol<Integer>{
+public class GenMajority extends WeakProtocol<Integer> {
 
     private int[] a;
 

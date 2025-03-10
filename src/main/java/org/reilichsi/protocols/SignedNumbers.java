@@ -61,7 +61,7 @@ public class SignedNumbers extends PopulationProtocol<Pair<Boolean, Integer>> {
     }
 
     @Override
-    public Population<Pair<Boolean, Integer>> initializeConfig(BufferedReader r) throws IOException {
+    public Population<Pair<Boolean, Integer>> configFactory(BufferedReader r) throws IOException {
         Population<Pair<Boolean, Integer>> p = new Population<>();
         System.out.println("x - 2y >= 1; x, y >= 0");
         System.out.print("x = ");

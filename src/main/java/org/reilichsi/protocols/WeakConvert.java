@@ -1,5 +1,6 @@
 package org.reilichsi.protocols;
 
+import org.reilichsi.Main;
 import org.reilichsi.Pair;
 import org.reilichsi.Population;
 import org.reilichsi.Helper;
@@ -17,7 +18,7 @@ public class WeakConvert extends PopulationProtocol<Pair<Object, Boolean>> {
     private WeakProtocol weakProtocol;
 
     public WeakConvert(BufferedReader r) throws IOException {
-        weakProtocol = WeakProtocol.getWeakProtocol(r);
+        weakProtocol = Main.getWeakProtocol(r);
     }
 
     @Override
@@ -45,7 +46,7 @@ public class WeakConvert extends PopulationProtocol<Pair<Object, Boolean>> {
     }
 
     @Override
-    public Population<Pair<Object, Boolean>> initializeConfig(BufferedReader r) throws IOException {
+    public Population<Pair<Object, Boolean>> configFactory(BufferedReader r) throws IOException {
         List<Pair<Object, Boolean>> weakPopulation = (List<Pair<Object, Boolean>>) weakProtocol.initializeConfig(r).stream().map(s -> weakProtocol.output(s).isPresent() ? new Pair<>(s, weakProtocol.output(s).get()) : new Pair<>(s, false)).collect(Collectors.toList());
         return new Population<>(weakPopulation.toArray(new Pair[0]));
     }
