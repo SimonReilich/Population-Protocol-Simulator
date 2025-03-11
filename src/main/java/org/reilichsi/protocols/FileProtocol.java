@@ -11,32 +11,43 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class FileProtocol extends PopulationProtocol<String> {
-    private final Set<String> Q;
+    private final String[] Q;
     private final Map<String, Map<String, Set<Pair<String, String>>>> transitions;
-    private final Set<String> I;
+    private final String[] I;
     private final Map<String, Boolean> output;
 
     public FileProtocol(BufferedReader r) throws IOException {
-        super();
-
         System.out.print("File to read from: ");
         // different parts of the input are seperated by ";"
         String[] tokens = Files.readString(Path.of(r.readLine())).replace(" ", "").replace("\n", "").replace("\r", "").split(";");
 
         // the set of states is the first line
-        Q = Arrays.stream(tokens[0].split(",")).collect(Collectors.toSet());
+        String[] Q_temp = tokens[0].split(",");
+
+        for (int i = 0; i < Q_temp.length; i++) {
+            Q_temp[i] = Q_temp[i].trim();
+        }
 
         // the set of initial states is the second line
-        I = Arrays.stream(tokens[1].split(",")).collect(Collectors.toSet());
+        String[] I_temp = tokens[1].split(",");
+
+        for (int i = 0; i < I_temp.length; i++) {
+            I_temp[i] = I_temp[i].trim();
+        }
+
+        super(I_temp.length, "Custom Predicate");
+
+        Q = Q_temp;
+        I = I_temp;
         output = new HashMap<>();
 
         // the set of positive outputs Q_+ is the third line
         Arrays.stream(tokens[2].split(",")).forEach(s -> output.put(s, true));
         // (Q_- = Q \ Q_+)
-        Q.forEach(s -> output.putIfAbsent(s, false));
+        Arrays.stream(Q).forEach(s -> output.putIfAbsent(s, false));
 
         transitions = new HashMap<>();
-        Q.forEach(s -> transitions.put(s, new HashMap<>()));
+        Arrays.stream(Q).forEach(s -> transitions.put(s, new HashMap<>()));
         for (int i = 3; i < tokens.length; i++) {
             // each transition has the structure p, q -> p', q' with p, q, p', q' in Q
             String[] args = tokens[i].split(",|(->)");
@@ -48,12 +59,12 @@ public class FileProtocol extends PopulationProtocol<String> {
 
     @Override
     public boolean predicate(int... x) {
-        return false;
+        throw new UnsupportedOperationException("Calculating the predicate for custom protocols is not supported");
     }
 
     @Override
     public Set<String> getQ() {
-        return Q;
+        return Arrays.stream(Q).collect(Collectors.toSet());
     }
 
     @Override
@@ -63,7 +74,7 @@ public class FileProtocol extends PopulationProtocol<String> {
 
     @Override
     public Set<String> getI() {
-        return I;
+        return Arrays.stream(I).collect(Collectors.toSet());
     }
 
 
@@ -83,7 +94,16 @@ public class FileProtocol extends PopulationProtocol<String> {
 
     @Override
     public Population<String> genConfig(int... x) {
-        return null;
+        if (x.length != super.ARG_LEN) {
+            throw new IllegalArgumentException("The number of arguments must be the same as the number of arguments");
+        }
+        Population<String> config = new Population<>();
+        for (int i = 0; i < super.ARG_LEN; i++) {
+            for (int j = 0; j < x[i]; j++) {
+                config.add(I[i]);
+            }
+        }
+        return config;
     }
 
     @Override
