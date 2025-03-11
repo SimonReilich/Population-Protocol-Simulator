@@ -14,10 +14,9 @@ public class AndProtocol<T, U> extends PopulationProtocol<Pair<T, U>> {
     private final PopulationProtocol<U> proto2;
 
     public AndProtocol(PopulationProtocol<T> protocol1, PopulationProtocol<U> protocol2) throws IOException {
+        super(protocol1.ARG_LEN + protocol2.ARG_LEN, "(" + protocol1.PREDICATE + ") & (" + protocol2.PREDICATE + ")");
         this.proto1 = protocol1;
         this.proto2 = protocol2;
-        super.ARG_LEN = protocol1.ARG_LEN + protocol2.ARG_LEN;
-        super.PREDICATE = "(" + protocol1.PREDICATE + ") & (" + protocol2.PREDICATE + ")";
     }
 
     @Override
@@ -68,8 +67,8 @@ public class AndProtocol<T, U> extends PopulationProtocol<Pair<T, U>> {
 
     @Override
     public Optional<Boolean> consensus(Population<Pair<T, U>> config) {
-        Population<T> config1 = new Population<>(config.stream().map(Pair::getFirst).collect(Collectors.toSet()));
-        Population<U> config2 = new Population<>(config.stream().map(Pair::getSecond).collect(Collectors.toSet()));
+        Population<T> config1 = new Population<>(config.stream().map(Pair::getFirst).filter(Objects::nonNull).collect(Collectors.toSet()));
+        Population<U> config2 = new Population<>(config.stream().map(Pair::getSecond).filter(Objects::nonNull).collect(Collectors.toSet()));
         if (this.proto1.consensus(config1).isPresent() && this.proto2.consensus(config2).isPresent()) {
             return Optional.of(this.proto1.consensus(config1).get() && this.proto2.consensus(config2).get());
         } else {

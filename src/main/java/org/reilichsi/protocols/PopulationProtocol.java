@@ -10,8 +10,13 @@ import java.util.*;
 
 public abstract class PopulationProtocol<T> {
 
-    public int ARG_LEN;
-    public String PREDICATE;
+    public final int ARG_LEN;
+    public final String PREDICATE;
+
+    public PopulationProtocol(final int ARG_LEN, final String PREDICATE) {
+        this.ARG_LEN = ARG_LEN;
+        this.PREDICATE = PREDICATE;
+    }
 
     /**
      * Conventionally evaluates the protocols predicate based on the provided arguments.
