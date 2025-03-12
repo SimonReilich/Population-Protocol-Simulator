@@ -6,14 +6,16 @@ import org.reilichsi.sniper.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.*;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
 
 public abstract class PopulationProtocol<T> {
 
     public final int ARG_LEN;
-    public final String PREDICATE;
+    public Function<Integer, String> PREDICATE;
 
-    public PopulationProtocol(final int ARG_LEN, final String PREDICATE) {
+    public PopulationProtocol(int ARG_LEN, Function<Integer, String> PREDICATE) {
         this.ARG_LEN = ARG_LEN;
         this.PREDICATE = PREDICATE;
     }
@@ -104,12 +106,29 @@ public abstract class PopulationProtocol<T> {
     public Sniper<T> initializeSniper(BufferedReader r) throws IOException {
         System.out.print("Kind of sniper? (r for random, p for percise, m for multi, n for none): ");
         String sniperCode = r.readLine();
-        if (sniperCode.equalsIgnoreCase("y")) {
-            return new RandomSniper<>(r);
+
+        if (sniperCode.equalsIgnoreCase("r")) {
+            System.out.print("Maximum amount of Snipes: ");
+            int maxSnipes = Integer.parseInt(r.readLine());
+            System.out.print("Average agents deactivated per round: ");
+            double snipeRate = Double.parseDouble(r.readLine());
+            return new RandomSniper<>(maxSnipes, snipeRate);
         } else if (sniperCode.equalsIgnoreCase("p")) {
-            return new PerciseSniper<>(r, this);
+            System.out.print("Maximum amount of Snipes: ");
+            int maxSnipes = Integer.parseInt(r.readLine());
+            System.out.print("Target: ");
+            T target = this.stateFromString(r.readLine());
+            return new PerciseSniper<>(maxSnipes, target);
         } else if (sniperCode.equalsIgnoreCase("m")) {
-            return new MultiSniper<>(r, this);
+            System.out.print("Maximum amount of Snipes: ");
+            int maxSnipes = Integer.parseInt(r.readLine());
+            System.out.print("Number of Snipers: ");
+            int count = Integer.parseInt(r.readLine());
+            Sniper<T>[] snipers = new Sniper[count];
+            for (int i = 0; i < count; i++) {
+                snipers[i] = this.initializeSniper(r);
+            }
+            return new MultiSniper<>(maxSnipes, snipers);
         } else {
             return new NoSniper<>();
         }

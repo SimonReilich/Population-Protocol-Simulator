@@ -1,11 +1,14 @@
 package org.reilichsi;
 
 import org.reilichsi.protocols.*;
-import org.reilichsi.sniper.*;
+import org.reilichsi.sniper.Sniper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
 
 public class Main {
     private static PopulationProtocol protocol;
@@ -19,15 +22,30 @@ public class Main {
 
         protocol = getProtocol(r);
         assert protocol != null;
-        config = protocol.configFactory(r);
+
+        System.out.println("Protocol is computing the following predicate: " + protocol.PREDICATE.apply(0));
+        int[] x = new int[protocol.ARG_LEN];
+
+        for (int i = 0; i < x.length; i++) {
+            System.out.print("x_" + i + ": ");
+            x[i] = Integer.parseInt(r.readLine());
+        }
+
+        config = protocol.genConfig(x);
         sniper = protocol.initializeSniper(r);
+
+        int inTol = -1;
+        if (!(protocol instanceof FileProtocol)) {
+            inTol = calculateInTol(x);
+            System.out.println("Protocol with this input has the following initial tolerance: " + inTol);
+        }
 
         boolean fastSim;
         System.out.print("Fast simulation? (y/n): ");
         fastSim = r.readLine().equalsIgnoreCase("y");
 
         System.out.println("\nStarting simulation...\n");
-        System.out.print(config.toString());
+        System.out.println(config.toString());
 
         // Run the simulation
         boolean snipeInNextStep = true;
@@ -36,10 +54,7 @@ public class Main {
         }
 
         // Print the final configuration
-        if (fastSim) {
-            System.out.println("\n\nFinal configuration:\n");
-        }
-        System.out.println("\r" + config.toString());
+        System.out.println("\n" + config.toString());
         System.out.println("\nConsensus reached: " + protocol.consensus(config).get());
     }
 
@@ -65,46 +80,75 @@ public class Main {
 
         if (!fastSim) {
             Thread.sleep(1000);
-            System.out.print("\r" + config.toString(agent1, agent2));
+        }
+        System.out.println("\n" + config.toString(agent1, agent2));
+        if (!fastSim) {
             Thread.sleep(1000);
         }
 
         // Update the configuration
-        config.set(agent1, newState.getFirst());
-        config.set(agent2, newState.getSecond());
+        config.set(agent1, newState.first());
+        config.set(agent2, newState.second());
 
+        System.out.println("\n" + config.toString(agent1, agent2));
         if (!fastSim) {
-            System.out.print("\r" + config.toString(agent1, agent2));
             Thread.sleep(1000);
-            System.out.print("\r" + config.toString());
         }
+        System.out.println("\n" + config.toString());
 
         return true;
     }
 
+    public static int calculateInTol(int[] x) {
+        boolean value = protocol.predicate(x);
+        for (int i = 1; i <= Arrays.stream(x).sum(); i++) {
+            if (Helper.getSub(x, i).stream().anyMatch(c -> protocol.predicate(c) != value)) {
+                return i - 1;
+            }
+        }
+        return Arrays.stream(x).sum();
+    }
+
     public static PopulationProtocol getProtocol(BufferedReader r) throws IOException {
-        System.out.print("Protocol to simulate? (p for Pebbles, t for Tower, i for InhomTower, s for SignedNumbers, f for file, a for and, n for negation, w for WeakConvert): ");
+        System.out.print("Protocol to simulate? (p for Pebbles, t for Tower, i for InhomTower, s for SignedNumbers, f for file, a for and, o for or, n for negation, w for WeakConvert): ");
         String protocolCode = r.readLine();
 
         // Initialize the protocol
         if (protocolCode.equalsIgnoreCase("p")) {
-            return new Pebbles(r);
+            System.out.print("Threshold t (t >= 1): ");
+            int t = Integer.parseInt(r.readLine());
+            return new Pebbles(t);
         } else if (protocolCode.equalsIgnoreCase("t")) {
-            return new Tower(r);
+            System.out.print("Threshold t (t >= 1): ");
+            int t = Integer.parseInt(r.readLine());
+            return new Tower(t);
         } else if (protocolCode.equalsIgnoreCase("i")) {
-            return new InhomTower(r);
+            System.out.print("Threshold t (t >= 1): ");
+            int t = Integer.parseInt(r.readLine());
+            System.out.print("Number of Dimensions: ");
+            int count = Integer.parseInt(r.readLine());
+            int[] a = new int[count];
+            for (int i = 0; i < a.length; i++) {
+                System.out.print("a_" + i + " (in N): ");
+                a[i] = Integer.parseInt(r.readLine());
+            }
+            return new InhomTower(t, a);
         } else if (protocolCode.equalsIgnoreCase("s")) {
             return new SignedNumbers();
         } else if (protocolCode.equalsIgnoreCase("f")) {
-            return new FileProtocol(r);
+            System.out.print("File to read from: ");
+            String file = r.readLine();
+            return new FileProtocol(Files.readString(Path.of(file)).replace(" ", "").replace("\n", "").replace("\r", "").split(";"));
         } else if (protocolCode.equalsIgnoreCase("a")) {
-            return new AndProtocol(r);
+            return new AndProtocol(getProtocol(r), getProtocol(r));
+        } else if (protocolCode.equalsIgnoreCase("o")) {
+            return new OrProtocol(getProtocol(r), getProtocol(r));
         } else if (protocolCode.equalsIgnoreCase("n")) {
-            return new NotProtocol(r);
+            return new NotProtocol(getProtocol(r));
         } else if (protocolCode.equalsIgnoreCase("w")) {
-            return new WeakConvert(r);
+            return new WeakConvert(getWeakProtocol(r));
         }
-        return null;
+        throw new IllegalArgumentException("No such Protocol");
     }
 
     public static WeakProtocol getWeakProtocol(BufferedReader r) throws IOException {
@@ -113,12 +157,27 @@ public class Main {
 
         // Initialize the protocol
         if (protocolCode.equalsIgnoreCase("g")) {
-            return new GenMajority(r);
+            System.out.print("Number of Dimensions: ");
+            int count = Integer.parseInt(r.readLine());
+            int[] a = new int[count];
+            for (int i = 0; i < a.length; i++) {
+                System.out.print("a_" + i + " (in Z): ");
+                a[i] = Integer.parseInt(r.readLine());
+            }
+            return new GenMajority(a);
         } else if (protocolCode.equalsIgnoreCase("i")) {
-            return new InhomTowerCancle(r);
+            System.out.print("Threshold t (t >= 1): ");
+            int t = Integer.parseInt(r.readLine());
+            System.out.print("Number of Dimensions: ");
+            int count = Integer.parseInt(r.readLine());
+            int[] a = new int[count];
+            for (int i = 0; i < a.length; i++) {
+                System.out.print("a_" + i + " (in Z): ");
+                a[i] = Integer.parseInt(r.readLine());
+            }
+            return new InhomTowerCancle(t, a);
         }
-
-        return null;
+        throw new IllegalArgumentException("No such weak protocol");
     }
 }
 

@@ -1,63 +1,56 @@
 package org.reilichsi.protocols;
 
+import org.reilichsi.Helper;
 import org.reilichsi.Pair;
 import org.reilichsi.Population;
-import org.reilichsi.Helper;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 public class InhomTowerCancle extends WeakProtocol<Object> {
 
-    private int t;
+    private final int t;
+    private final int[] a;
     private int T;
-    private int[] a;
 
-    public InhomTowerCancle(BufferedReader r) throws IOException {
-        System.out.print("threshold t: ");
-        t = Integer.parseInt(r.readLine());
-        T = t;
-        System.out.print("How many factors?: ");
-        int count = Integer.parseInt(r.readLine());
-        a = new int[count];
-        for (int i = 0; i < count; i++) {
-            System.out.print("Factor " + i + ": ");
-            a[i] = Integer.parseInt(r.readLine());
-            T = Math.max(a[i], T);
+    public InhomTowerCancle(int t, int... a) {
+
+        super(a.length, n -> "");
+
+        // generating String-representation for predicate
+        Function<Integer, String> p = n -> "(" + a[0] + " * x_" + n + ")";
+        for (int i = 1; i < a.length; i++) {
+            Function<Integer, String> finalP = p;
+            int finalI = i;
+            p = n -> finalP.apply(n) + "(" + a[finalI] + " * x_" + (n + finalI) + ")";
+        }
+        Function<Integer, String> finalP = p;
+        super.PREDICATE = n -> finalP.apply(n) + " >= " + t;
+
+        this.t = t;
+        this.a = a;
+
+        for (int ai : a) {
+            this.T = Math.max(ai, this.T);
         }
     }
 
     @Override
-    public Population<Object> initializeConfig(BufferedReader r) throws IOException {
-        Population<Object> config = new Population<>();
-        for (int ai : a) {
-            System.out.print("factor for skalar " + ai + ": ");
-            int count = Integer.parseInt(r.readLine());
-            if (ai > 0) {
-                for (int j = 0; j < count; j++) {
-                    config.add(new Pair<>(0, ai));
-                }
-            } else {
-                for (int j = 0; j < count; j++) {
-                    config.add(ai);
-                }
-            }
-        }
-        return config;
+    public boolean predicate(int... x) {
+        return false;
     }
 
     @Override
     public Set<Object> getQ() {
         Set<Object> set = new HashSet<>();
-        for (int i = -Arrays.stream(a).max().getAsInt(); i <= 0; i++) {
+        for (int i = -Arrays.stream(this.a).max().getAsInt(); i <= 0; i++) {
             set.add(i);
         }
-        for (int i = 0; i <= T; i++) {
-            for (int j = i + 1; j <= T; j++) {
+        for (int i = 0; i <= this.T; i++) {
+            for (int j = i + 1; j <= this.T; j++) {
                 set.add(new Pair<>(i, j));
             }
         }
@@ -65,23 +58,9 @@ public class InhomTowerCancle extends WeakProtocol<Object> {
     }
 
     @Override
-    public Set<Pair<Object, Object>> delta(Object x, Object y) {
-        if (x instanceof Pair && y instanceof Pair && ((Pair<Integer, Integer>) x).getFirst() <= ((Pair<Integer, Integer>) y).getFirst() && ((Pair<Integer, Integer>) x).getSecond() < T && ((Pair<Integer, Integer>) y).getSecond() < T) {
-            return Set.of(new Pair<>(x, new Pair<>(((Pair<Integer, Integer>) y).getFirst() + 1, ((Pair<Integer, Integer>) y).getSecond() + 1)));
-        } else if (x instanceof Pair && y instanceof Integer && ((int) y) != 0 && ((Pair<Integer, Integer>) x).getFirst() < ((Pair<Integer, Integer>) x).getSecond()) {
-            if (((Pair<Integer, Integer>) x).getFirst() == ((Pair<Integer, Integer>) x).getSecond() - 1) {
-                return Set.of(new Pair<>(0, ((int) y) + 1));
-            } else {
-                return Set.of(new Pair<>(new Pair<>(((Pair<Integer, Integer>) x).getFirst(), ((Pair<Integer, Integer>) x).getSecond() - 1), ((int) y) + 1));
-            }
-        }
-        return Set.of();
-    }
-
-    @Override
     public Set<Object> getI() {
         Set<Object> set = new HashSet<>();
-        for (int ai : a) {
+        for (int ai : this.a) {
             set.add(new Pair<>(0, ai));
             set.add(ai);
         }
@@ -89,10 +68,27 @@ public class InhomTowerCancle extends WeakProtocol<Object> {
     }
 
     @Override
+    public Set<Pair<Object, Object>> delta(Object x, Object y) {
+        if (x instanceof Pair && y instanceof Pair && ((Pair<Integer, Integer>) x).first() <= ((Pair<Integer, Integer>) y).first() && ((Pair<Integer, Integer>) x).second() < this.T && ((Pair<Integer, Integer>) y).second() < this.T) {
+            // step
+            return Set.of(new Pair<>(x, new Pair<>(((Pair<Integer, Integer>) y).first() + 1, ((Pair<Integer, Integer>) y).second() + 1)));
+        } else if (x instanceof Pair && y instanceof Integer && ((int) y) != 0 && ((Pair<Integer, Integer>) x).first() < ((Pair<Integer, Integer>) x).second()) {
+            if (((Pair<Integer, Integer>) x).first() == ((Pair<Integer, Integer>) x).second() - 1) {
+                // cancel with empty intervall
+                return Set.of(new Pair<>(0, ((int) y) + 1));
+            } else {
+                // cancel
+                return Set.of(new Pair<>(new Pair<>(((Pair<Integer, Integer>) x).first(), ((Pair<Integer, Integer>) x).second() - 1), ((int) y) + 1));
+            }
+        }
+        return Set.of();
+    }
+
+    @Override
     public Optional<Boolean> output(Object state) {
         if (state instanceof Integer && ((int) state) != 0) {
             return Optional.of(false);
-        } else if (state instanceof Pair && ((Pair<Integer, Integer>) state).getSecond() >= t) {
+        } else if (state instanceof Pair && ((Pair<Integer, Integer>) state).second() >= this.t) {
             return Optional.of(true);
         } else {
             return Optional.empty();
@@ -108,6 +104,23 @@ public class InhomTowerCancle extends WeakProtocol<Object> {
             return Optional.of(false);
         }
         return Optional.of(true);
+    }
+
+    @Override
+    public Population<Object> genConfig(int... x) {
+        Population<Object> config = new Population<>();
+        for (int i = 0; i < x.length; i++) {
+            if (this.a[i] > 0) {
+                for (int j = 0; j < x[i]; j++) {
+                    config.add(new Pair<>(0, this.a[i]));
+                }
+            } else {
+                for (int j = 0; j < x[i]; j++) {
+                    config.add(this.a[i]);
+                }
+            }
+        }
+        return config;
     }
 
     @Override

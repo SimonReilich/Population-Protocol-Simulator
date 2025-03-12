@@ -5,7 +5,7 @@ import org.reilichsi.Population;
 public class NoSniper<T> extends Sniper<T> {
 
     public NoSniper() {
-        super();
+        super(0);
     }
 
     @Override

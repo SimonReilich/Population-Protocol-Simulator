@@ -1,42 +1,52 @@
 package org.reilichsi.protocols;
 
+import org.reilichsi.Helper;
 import org.reilichsi.Pair;
 import org.reilichsi.Population;
-import org.reilichsi.Helper;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 public class InhomTower extends PopulationProtocol<Pair<Integer, Integer>> {
 
     private final int[] a;
     private final int t;
 
-    public InhomTower(int t, int... a) throws IOException {
-        System.out.print("threshold t: ");
-        t = Integer.parseInt(r.readLine());
-        System.out.print("How many factors?: ");
-        int count = Integer.parseInt(r.readLine());
-        a = new int[count];
-        for (int i = 0; i < count; i++) {
-            System.out.print("Factor " + i + " (a_i > 0): ");
-            a[i] = Integer.parseInt(r.readLine());
+    public InhomTower(int t, int... a) {
+
+        super(a.length, n -> "");
+
+        // generating String-representation for predicate
+        Function<Integer, String> p = n -> "(" + a[0] + " * x_" + n + ")";
+        for (int i = 1; i < a.length; i++) {
+            Function<Integer, String> finalP = p;
+            int finalI = i;
+            p = n -> finalP.apply(n) + "(" + a[finalI] + " * x_" + (n + finalI) + ")";
         }
+        Function<Integer, String> finalP = p;
+        super.PREDICATE = n -> finalP.apply(n) + " >= " + t;
+
+        this.a = a;
+        this.t = t;
     }
 
     @Override
     public boolean predicate(int... x) {
-        return false;
+        super.assertArgLength(x);
+        int n = 0;
+        for (int i = 0; i < x.length; i++) {
+            n += this.a[i] * x[i];
+        }
+        return n >= this.t;
     }
 
     @Override
     public Set<Pair<Integer, Integer>> getQ() {
         HashSet<Pair<Integer, Integer>> Q = new HashSet<>();
-        for (int ai : a) {
-            for (int j = 0; j + ai <= t + 1; j++) {
+        for (int ai : this.a) {
+            for (int j = 0; j + ai <= this.t + 1; j++) {
                 Q.add(new Pair<>(j, j + ai));
             }
         }
@@ -46,7 +56,7 @@ public class InhomTower extends PopulationProtocol<Pair<Integer, Integer>> {
     @Override
     public Set<Pair<Integer, Integer>> getI() {
         HashSet<Pair<Integer, Integer>> I = new HashSet<>();
-        for (int ai : a) {
+        for (int ai : this.a) {
             I.add(new Pair<>(0, ai));
         }
         return I;
@@ -54,17 +64,19 @@ public class InhomTower extends PopulationProtocol<Pair<Integer, Integer>> {
 
     @Override
     public Set<Pair<Pair<Integer, Integer>, Pair<Integer, Integer>>> delta(Pair<Integer, Integer> x, Pair<Integer, Integer> y) {
-        if (Helper.arePairsJoint(x, y) && x.getFirst() <= y.getFirst() && x.getSecond() <= t && y.getSecond() <= t) {
-            return Set.of(new Pair<>(x, new Pair<>(y.getFirst() + 1, y.getSecond() + 1)));
-        } else if (x.getSecond() == t + 1 && y.getSecond() <= t) {
-            return Set.of(new Pair<>(x, new Pair<>(t + 1 - (y.getSecond() - y.getFirst()), t + 1)));
+        if (Helper.arePairsJoint(x, y) && x.first() <= y.first() && x.second() <= this.t && y.second() <= this.t) {
+            // step
+            return Set.of(new Pair<>(x, new Pair<>(y.first() + 1, y.second() + 1)));
+        } else if (x.second() == this.t + 1 && y.second() <= this.t) {
+            // accum
+            return Set.of(new Pair<>(x, new Pair<>(this.t + 1 - (y.second() - y.first()), this.t + 1)));
         }
         return Set.of();
     }
 
     @Override
     public boolean output(Pair<Integer, Integer> state) {
-        return state.getSecond() == t + 1;
+        return state.second() == this.t + 1;
     }
 
     @Override
@@ -82,7 +94,7 @@ public class InhomTower extends PopulationProtocol<Pair<Integer, Integer>> {
         Population<Pair<Integer, Integer>> config = new Population<>();
         for (int i = 0; i < super.ARG_LEN; i++) {
             for (int j = 0; j < x[i]; j++) {
-                config.add(new Pair<>(0, a[i]));
+                config.add(new Pair<>(0, this.a[i]));
             }
         }
         return config;

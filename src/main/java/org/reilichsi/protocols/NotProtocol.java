@@ -1,60 +1,59 @@
 package org.reilichsi.protocols;
 
-import org.reilichsi.Main;
 import org.reilichsi.Pair;
 import org.reilichsi.Population;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
 
-public class NotProtocol extends PopulationProtocol<Object> {
+public class NotProtocol<T> extends PopulationProtocol<T> {
 
-    private PopulationProtocol protocol;
+    private final PopulationProtocol<T> p;
 
-    public NotProtocol(BufferedReader r) throws IOException {
-        super();
-        System.out.println("Pick a protocol to negate: ");
-        protocol = Main.getProtocol(r);
+    public NotProtocol(PopulationProtocol<T> protocol) {
+        super(protocol.ARG_LEN, protocol.PREDICATE);
+        this.p = protocol;
     }
 
     @Override
-    public Set<Object> getQ() {
-        return protocol.getQ();
+    public boolean predicate(int... x) {
+        assertArgLength(x);
+        return !this.p.predicate(x);
     }
 
     @Override
-    public Set<Pair<Object, Object>> delta(Object x, Object y) {
-        return protocol.delta(x, y);
+    public Set<T> getQ() {
+        return this.p.getQ();
     }
 
     @Override
-    public Set<Object> getI() {
-        return protocol.getI();
+    public Set<T> getI() {
+        return this.p.getI();
     }
 
     @Override
-    public Population<Object> configFactory(BufferedReader r) throws IOException {
-        return protocol.configFactory(r);
+    public Set<Pair<T, T>> delta(T x, T y) {
+        return this.p.delta(x, y);
     }
 
     @Override
-    public boolean output(Object state) {
-        return !protocol.output(state);
+    public boolean output(T state) {
+        return !this.p.output(state);
     }
 
     @Override
-    public Optional<Boolean> consensus(Population<Object> config) {
-        if (protocol.consensus(config).isPresent()) {
-            return Optional.of(!((Boolean) protocol.consensus(config).get()));
-        } else {
-            return Optional.empty();
-        }
+    public Optional<Boolean> consensus(Population<T> config) {
+        return this.p.consensus(config).map(b -> !b);
     }
 
     @Override
-    public Object stateFromString(String s) {
-        return protocol.stateFromString(s);
+    public Population<T> genConfig(int... x) {
+        assertArgLength(x);
+        return this.p.genConfig(x);
+    }
+
+    @Override
+    public T stateFromString(String s) {
+        return this.p.stateFromString(s);
     }
 }

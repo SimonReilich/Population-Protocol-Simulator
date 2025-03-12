@@ -1,40 +1,26 @@
 package org.reilichsi.sniper;
 
 import org.reilichsi.Population;
-import org.reilichsi.protocols.PopulationProtocol;
-
-import java.io.BufferedReader;
-import java.io.IOException;
 
 public class MultiSniper<T> extends Sniper<T> {
 
-    private Sniper<T>[] snipers;
-    private int maxSnipes;
+    private final Sniper<T>[] snipers;
 
-    public MultiSniper(BufferedReader r, PopulationProtocol<T> protocol) throws IOException {
-        System.out.print("Maximum number of snipes (-1 for no limit): ");
-        maxSnipes = Integer.parseInt(r.readLine());
-        System.out.print("How many snipers: ");
-        int count = Integer.parseInt(r.readLine());
-        snipers = new Sniper[count];
-        for (int i = 0; i < count; i++) {
-            snipers[i] = protocol.initializeSniper(r);
-        }
+    public MultiSniper(int maxSnipes, Sniper<T>... snipers) {
+        super(maxSnipes);
+        this.snipers = snipers;
     }
 
     @Override
     public boolean snipe(Population<T> config, boolean fastSim) throws InterruptedException {
-
-        if (maxSnipes >= config.sizeActive()) {
-            maxSnipes = config.sizeActive() - 1;
-        }
+        super.matchPopulationSize(config);
 
         boolean out = false;
-        for (Sniper<T> sniper : snipers) {
-            if (maxSnipes != 0 && sniper.snipe(config, fastSim)) {
-                maxSnipes--;
+        for (Sniper<T> sniper : this.snipers) {
+            if (super.canSnipe() && sniper.snipe(config, fastSim)) {
+                super.decreaseSnipes();
                 out = true;
-                if (maxSnipes == 0) {
+                if (!super.canSnipe()) {
                     break;
                 }
             }

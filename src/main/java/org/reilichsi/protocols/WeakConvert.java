@@ -1,79 +1,88 @@
 package org.reilichsi.protocols;
 
-import org.reilichsi.Main;
+import org.reilichsi.Helper;
 import org.reilichsi.Pair;
 import org.reilichsi.Population;
-import org.reilichsi.Helper;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class WeakConvert extends PopulationProtocol<Pair<Object, Boolean>> {
+public class WeakConvert<T> extends PopulationProtocol<Pair<T, Boolean>> {
 
-    private WeakProtocol weakProtocol;
+    private final WeakProtocol<T> w;
 
-    public WeakConvert(BufferedReader r) throws IOException {
-        weakProtocol = Main.getWeakProtocol(r);
+    public WeakConvert(WeakProtocol<T> weakProtocol) {
+        super(weakProtocol.ARG_LEN, weakProtocol.PREDICATE);
+        this.w = weakProtocol;
     }
 
     @Override
-    public Set<Pair<Object, Boolean>> getQ() {
-        return (Set<Pair<Object, Boolean>>) weakProtocol.getQ().stream().flatMap(s -> Set.of(new Pair<>(s, true), new Pair<>(s, false)).stream()).collect(Collectors.toSet());
+    public boolean predicate(int... x) {
+        assertArgLength(x);
+        return this.w.predicate(x);
     }
 
     @Override
-    public Set<Pair<Pair<Object, Boolean>, Pair<Object, Boolean>>> delta(Pair<Object, Boolean> x, Pair<Object, Boolean> y) {
-        HashSet<Pair<Pair<Object, Boolean>, Pair<Object, Boolean>>> result = new HashSet<>();
-        if (weakProtocol.output(x.getFirst()).isPresent() && weakProtocol.output(y.getFirst()).isEmpty()) {
-            result.add(new Pair<>(new Pair<>(x.getFirst(), (Boolean) weakProtocol.output(x.getFirst()).get()), new Pair<>(y.getFirst(), (Boolean) weakProtocol.output(x.getFirst()).get())));
-        } else if (weakProtocol.output(y.getFirst()).isPresent() && weakProtocol.output(x.getFirst()).isEmpty()) {
-            result.add(new Pair<>(new Pair<>(x.getFirst(), (Boolean) weakProtocol.output(y.getFirst()).get()), new Pair<>(y.getFirst(), (Boolean) weakProtocol.output(y.getFirst()).get())));
-        } else if (weakProtocol.output(x.getFirst()).isEmpty() && weakProtocol.output(y.getFirst()).isEmpty() && x.getSecond() != y.getSecond()) {
-            result.add(new Pair<>(new Pair<>(x.getFirst(), false), new Pair<>(y.getFirst(), false)));
+    public Set<Pair<T, Boolean>> getQ() {
+        return this.w.getQ().stream().flatMap(s -> Set.of(new Pair<>(s, true), new Pair<>(s, false)).stream()).collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<Pair<T, Boolean>> getI() {
+        return this.w.getI().stream().map(s -> this.w.output(s).isPresent() ? new Pair<>(s, this.w.output(s).get()) : new Pair<>(s, false)).collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<Pair<Pair<T, Boolean>, Pair<T, Boolean>>> delta(Pair<T, Boolean> x, Pair<T, Boolean> y) {
+        HashSet<Pair<Pair<T, Boolean>, Pair<T, Boolean>>> result = new HashSet<>();
+        if (this.w.output(x.first()).isPresent() && this.w.output(y.first()).isEmpty()) {
+            // witnessPos / witnessNeg
+            result.add(new Pair<>(new Pair<>(x.first(), this.w.output(x.first()).get()), new Pair<>(y.first(), this.w.output(x.first()).get())));
+        } else if (this.w.output(y.first()).isPresent() && this.w.output(x.first()).isEmpty()) {
+            // witnessPos / witnessNeg
+            result.add(new Pair<>(new Pair<>(x.first(), this.w.output(y.first()).get()), new Pair<>(y.first(), this.w.output(y.first()).get())));
+        } else if (this.w.output(x.first()).isEmpty() && this.w.output(y.first()).isEmpty() && x.second() != y.second()) {
+            // convince
+            result.add(new Pair<>(new Pair<>(x.first(), false), new Pair<>(y.first(), false)));
         }
-        result.addAll((Set) weakProtocol.delta(x.getFirst(), y.getFirst()).stream().map(s -> new Pair<>(new Pair<>(((Pair) s).getFirst(), (weakProtocol.output(((Pair) s).getFirst()).isPresent() && (Boolean) weakProtocol.output(((Pair) s).getFirst()).get())), new Pair<>(((Pair) s).getSecond(), (weakProtocol.output(((Pair) s).getSecond()).isPresent() && (Boolean) weakProtocol.output(((Pair) s).getSecond()).get())))).collect(Collectors.toSet()));
+        // derived
+        result.addAll(this.w.delta(x.first(), y.first()).stream().map(s -> new Pair<>(new Pair<>(s.first(), (this.w.output(s.first()).isPresent() && this.w.output(s.first()).get())), new Pair<>(s.second(), (this.w.output(s.second()).isPresent() && this.w.output(s.second()).get())))).collect(Collectors.toSet()));
         return result;
     }
 
     @Override
-    public Set<Pair<Object, Boolean>> getI() {
-        return (Set<Pair<Object, Boolean>>) weakProtocol.getI().stream().map(s -> weakProtocol.output(s).isPresent() ? new Pair<>(s, weakProtocol.output(s).get()) : new Pair<>(s, false)).collect(Collectors.toSet());
+    public boolean output(Pair<T, Boolean> state) {
+        return this.w.output(state.first()).isPresent() ? (boolean) this.w.output(state.first()).get() : state.second();
     }
 
     @Override
-    public Population<Pair<Object, Boolean>> configFactory(BufferedReader r) throws IOException {
-        List<Pair<Object, Boolean>> weakPopulation = (List<Pair<Object, Boolean>>) weakProtocol.initializeConfig(r).stream().map(s -> weakProtocol.output(s).isPresent() ? new Pair<>(s, weakProtocol.output(s).get()) : new Pair<>(s, false)).collect(Collectors.toList());
-        return new Population<>(weakPopulation.toArray(new Pair[0]));
-    }
-
-    @Override
-    public boolean output(Pair<Object, Boolean> state) {
-        return weakProtocol.output(state.getFirst()).isPresent() ? (boolean) weakProtocol.output(state.getFirst()).get() : state.getSecond();
-    }
-
-    @Override
-    public Optional<Boolean> consensus(Population<Pair<Object, Boolean>> config) {
-        List<Object> list = config.stream().map(Pair::getFirst).collect(Collectors.toList());
-        Population<Object> weakPop = new Population<>();
-        for (Object o : list) {
-            weakPop.add(o);
+    public Optional<Boolean> consensus(Population<Pair<T, Boolean>> config) {
+        List<T> list = config.stream().map(Pair::first).toList();
+        Population<T> weakPop = new Population<>();
+        for (T s : list) {
+            weakPop.add(s);
         }
-        return weakProtocol.consensus(weakPop);
+        return this.w.consensus(weakPop);
     }
 
     @Override
-    public Pair<Object, Boolean> stateFromString(String s) {
+    public Population<Pair<T, Boolean>> genConfig(int... x) {
+        assertArgLength(x);
+        List<Pair<T, Boolean>> weakPopulation = this.w.genConfig(x).stream().map(s -> this.w.output(s).isPresent() ? new Pair<>(s, this.w.output(s).get()) : new Pair<>(s, false)).toList();
+        return new Population<Pair<T, Boolean>>(weakPopulation.toArray(new Pair[0]));
+    }
+
+    @Override
+    public Pair<T, Boolean> stateFromString(String s) {
         s = s.trim();
         for (int i = s.indexOf(';'); i < s.length(); i++) {
             String first = s.substring(1, i).trim();
             String second = s.substring(i + 2, s.length() - 1).trim();
             if (Helper.countChar(first, '(') - Helper.countChar(first, ')') == 0 && Helper.countChar(second, '(') - Helper.countChar(second, ')') == 0) {
-                return new Pair<>(weakProtocol.stateFromString(first), Boolean.parseBoolean(second));
+                return new Pair<>(this.w.stateFromString(first), Boolean.parseBoolean(second));
             }
         }
         throw new IllegalArgumentException("Invalid state: " + s);

@@ -1,7 +1,9 @@
 package org.reilichsi;
 
-import java.util.*;
-import java.util.function.Function;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 public class Population<T> {
@@ -9,6 +11,7 @@ public class Population<T> {
     private final List<T> population;
     private final List<Boolean> active;
 
+    @SafeVarargs
     public Population(T... input) {
         population = new ArrayList<>();
         population.addAll(Arrays.asList(input));
@@ -54,7 +57,8 @@ public class Population<T> {
         return (int) active.stream().filter(b -> b).count();
     }
 
-    public boolean contains(T... states) {
+    @SafeVarargs
+    public final boolean contains(T... states) {
         boolean[] visited = new boolean[population.size()];
         Arrays.fill(visited, false);
         for (T s : states) {

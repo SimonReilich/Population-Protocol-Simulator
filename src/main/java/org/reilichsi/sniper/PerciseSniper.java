@@ -1,34 +1,29 @@
 package org.reilichsi.sniper;
 
 import org.reilichsi.Population;
-import org.reilichsi.protocols.PopulationProtocol;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 
 public class PerciseSniper<T> extends Sniper<T> {
 
-    private T target;
-    private int maxSnipes;
+    private final T target;
 
-    public PerciseSniper(BufferedReader r, PopulationProtocol<T> protocol) throws IOException {
-        super();
-        System.out.print("Target state: ");
-        target = protocol.stateFromString(r.readLine());
-        System.out.print("Maximum number of snipes (-1 for no limit): ");
-        maxSnipes = Integer.parseInt(r.readLine());
+    public PerciseSniper(int maxSnipes, T target) throws IOException {
+        super(maxSnipes);
+        this.target = target;
     }
 
     @Override
     public boolean snipe(Population<T> config, boolean fastSim) throws InterruptedException {
-
-        if (maxSnipes >= config.sizeActive()) {
-            maxSnipes = config.sizeActive() - 1;
-        }
+        super.matchPopulationSize(config);
 
         boolean out = false;
-        while (maxSnipes != 0 && config.killState(target)) {
-            maxSnipes--;
+        while (super.canSnipe() && config.killState(this.target)) {
+            super.decreaseSnipes();
+            if (!fastSim) {
+                Thread.sleep(1000);
+            }
+            System.out.println("\n" + config);
             out = true;
         }
         return out;
