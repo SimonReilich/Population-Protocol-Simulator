@@ -21,6 +21,7 @@ public class AndProtocol<T, U> extends PopulationProtocol<Pair<T, U>> {
 
     @Override
     public boolean predicate(int... x) {
+        super.assertArgLength(x);
         return this.proto1.predicate(Arrays.copyOfRange(x, 0, this.proto1.ARG_LEN)) && this.proto2.predicate(Arrays.copyOfRange(x, this.proto1.ARG_LEN, this.proto1.ARG_LEN + this.proto2.ARG_LEN));
     }
 

@@ -68,15 +68,14 @@ public class FileProtocol extends PopulationProtocol<String> {
     }
 
     @Override
-    public Set<Pair<String, String>> delta(String x, String y) {
-        return transitions.getOrDefault(x, Map.of()).getOrDefault(y, Set.of());
-    }
-
-    @Override
     public Set<String> getI() {
         return Arrays.stream(I).collect(Collectors.toSet());
     }
 
+    @Override
+    public Set<Pair<String, String>> delta(String x, String y) {
+        return transitions.getOrDefault(x, Map.of()).getOrDefault(y, Set.of());
+    }
 
     @Override
     public boolean output(String state) {
@@ -94,9 +93,7 @@ public class FileProtocol extends PopulationProtocol<String> {
 
     @Override
     public Population<String> genConfig(int... x) {
-        if (x.length != super.ARG_LEN) {
-            throw new IllegalArgumentException("The number of arguments must be the same as the number of arguments");
-        }
+        super.assertArgLength(x);
         Population<String> config = new Population<>();
         for (int i = 0; i < super.ARG_LEN; i++) {
             for (int j = 0; j < x[i]; j++) {

@@ -76,6 +76,15 @@ public abstract class PopulationProtocol<T> {
     public abstract Population<T> genConfig(int... x);
 
     /**
+     * Checks if the number of arguments provided is equal to the number of arguments for the protocol
+     */
+    public void assertArgLength(int... x) {
+        if (x.length != this.ARG_LEN) {
+            throw new IllegalArgumentException("The number of arguments must be the same as the number of arguments");
+        }
+    }
+
+    /**
      * Parses a string representation of a state into the corresponding state of type T.
      *
      * @param s a string representation of a state

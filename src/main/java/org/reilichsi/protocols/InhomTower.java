@@ -12,10 +12,10 @@ import java.util.Set;
 
 public class InhomTower extends PopulationProtocol<Pair<Integer, Integer>> {
 
-    private int[] a;
-    private int t;
+    private final int[] a;
+    private final int t;
 
-    public InhomTower(BufferedReader r) throws IOException {
+    public InhomTower(int t, int... a) throws IOException {
         System.out.print("threshold t: ");
         t = Integer.parseInt(r.readLine());
         System.out.print("How many factors?: ");
@@ -25,6 +25,11 @@ public class InhomTower extends PopulationProtocol<Pair<Integer, Integer>> {
             System.out.print("Factor " + i + " (a_i > 0): ");
             a[i] = Integer.parseInt(r.readLine());
         }
+    }
+
+    @Override
+    public boolean predicate(int... x) {
+        return false;
     }
 
     @Override
@@ -39,16 +44,6 @@ public class InhomTower extends PopulationProtocol<Pair<Integer, Integer>> {
     }
 
     @Override
-    public Set<Pair<Pair<Integer, Integer>, Pair<Integer, Integer>>> delta(Pair<Integer, Integer> x, Pair<Integer, Integer> y) {
-        if (Helper.arePairsJoint(x, y) && x.getFirst() <= y.getFirst() && x.getSecond() <= t && y.getSecond() <= t) {
-            return Set.of(new Pair<>(x, new Pair<>(y.getFirst() + 1, y.getSecond() + 1)));
-        } else if (x.getSecond() == t + 1 && y.getSecond() <= t) {
-            return Set.of(new Pair<>(x, new Pair<>(t + 1 - (y.getSecond() - y.getFirst()), t + 1)));
-        }
-        return Set.of();
-    }
-
-    @Override
     public Set<Pair<Integer, Integer>> getI() {
         HashSet<Pair<Integer, Integer>> I = new HashSet<>();
         for (int ai : a) {
@@ -58,16 +53,13 @@ public class InhomTower extends PopulationProtocol<Pair<Integer, Integer>> {
     }
 
     @Override
-    public Population<Pair<Integer, Integer>> configFactory(BufferedReader r) throws IOException {
-        Population<Pair<Integer, Integer>> config = new Population<>();
-        for (int i = 0; i < a.length; i++) {
-            System.out.print("factor for skalar " + a[i] + ": ");
-            int count = Integer.parseInt(r.readLine());
-            for (int j = 0; j < count; j++) {
-                config.add(new Pair<>(0, a[i]));
-            }
+    public Set<Pair<Pair<Integer, Integer>, Pair<Integer, Integer>>> delta(Pair<Integer, Integer> x, Pair<Integer, Integer> y) {
+        if (Helper.arePairsJoint(x, y) && x.getFirst() <= y.getFirst() && x.getSecond() <= t && y.getSecond() <= t) {
+            return Set.of(new Pair<>(x, new Pair<>(y.getFirst() + 1, y.getSecond() + 1)));
+        } else if (x.getSecond() == t + 1 && y.getSecond() <= t) {
+            return Set.of(new Pair<>(x, new Pair<>(t + 1 - (y.getSecond() - y.getFirst()), t + 1)));
         }
-        return config;
+        return Set.of();
     }
 
     @Override
@@ -82,6 +74,18 @@ public class InhomTower extends PopulationProtocol<Pair<Integer, Integer>> {
         } else {
             return config.stream().anyMatch(s -> config.stream().filter(s2 -> Helper.arePairsJoint(s, s2)).count() > 1) ? Optional.empty() : Optional.of(false);
         }
+    }
+
+    @Override
+    public Population<Pair<Integer, Integer>> genConfig(int... x) {
+        super.assertArgLength(x);
+        Population<Pair<Integer, Integer>> config = new Population<>();
+        for (int i = 0; i < super.ARG_LEN; i++) {
+            for (int j = 0; j < x[i]; j++) {
+                config.add(new Pair<>(0, a[i]));
+            }
+        }
+        return config;
     }
 
     public Pair<Integer, Integer> stateFromString(String s) {
