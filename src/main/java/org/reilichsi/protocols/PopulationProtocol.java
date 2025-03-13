@@ -104,25 +104,25 @@ public abstract class PopulationProtocol<T> {
      * @throws IOException if an I/O error occurs while reading input
      */
     public Sniper<T> initializeSniper(BufferedReader r) throws IOException {
-        System.out.print("Kind of sniper? (r for random, p for percise, m for multi, n for none): ");
+        System.out.print("• Kind of sniper? (r for random, p for percise, m for multi, n for none): ");
         String sniperCode = r.readLine();
 
         if (sniperCode.equalsIgnoreCase("r")) {
-            System.out.print("Maximum amount of Snipes: ");
+            System.out.print("  - Maximum amount of Snipes: ");
             int maxSnipes = Integer.parseInt(r.readLine());
-            System.out.print("Average agents deactivated per round: ");
+            System.out.print("  - Average agents deactivated per round: ");
             double snipeRate = Double.parseDouble(r.readLine());
             return new RandomSniper<>(maxSnipes, snipeRate);
         } else if (sniperCode.equalsIgnoreCase("p")) {
-            System.out.print("Maximum amount of Snipes: ");
+            System.out.print("  - Maximum amount of Snipes: ");
             int maxSnipes = Integer.parseInt(r.readLine());
-            System.out.print("Target: ");
+            System.out.print("  - Target: ");
             T target = this.stateFromString(r.readLine());
             return new PerciseSniper<>(maxSnipes, target);
         } else if (sniperCode.equalsIgnoreCase("m")) {
-            System.out.print("Maximum amount of Snipes: ");
+            System.out.print("  - Maximum amount of Snipes: ");
             int maxSnipes = Integer.parseInt(r.readLine());
-            System.out.print("Number of Snipers: ");
+            System.out.print("  - Number of Snipers: ");
             int count = Integer.parseInt(r.readLine());
             Sniper<T>[] snipers = new Sniper[count];
             for (int i = 0; i < count; i++) {

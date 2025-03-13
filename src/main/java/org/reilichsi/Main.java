@@ -19,13 +19,14 @@ public class Main {
         System.out.println();
         BufferedReader r = new BufferedReader(new InputStreamReader(System.in));
 
+        System.out.println("Choose protocol");
         protocol = getProtocol(r);
 
-        System.out.println("Protocol is computing the following predicate: " + protocol.PREDICATE.apply(0));
+        System.out.println("• Protocol is computing the following predicate: " + protocol.PREDICATE.apply(0));
         int[] x = new int[protocol.ARG_LEN];
 
         for (int i = 0; i < x.length; i++) {
-            System.out.print("x_" + i + ": ");
+            System.out.print("  - x_" + i + ": ");
             x[i] = Integer.parseInt(r.readLine());
         }
 
@@ -34,17 +35,19 @@ public class Main {
         int inTol = -1;
         if (!(protocol instanceof FileProtocol)) {
             inTol = calculateInTol(x);
-            System.out.println("Protocol with this input has the following initial tolerance: " + inTol);
+            System.out.println("• Protocol with this input has the following initial tolerance: " + inTol);
         }
 
+        System.out.println("\nInitializing sniper");
         sniper = protocol.initializeSniper(r);
 
+        System.out.println("\nInitializing simulation");
         boolean fastSim;
-        System.out.print("Simulation? (s for slow, i for instant, f for file): ");
+        System.out.print("• simulation speed (s for slow, i for instant, f for file): ");
         String simCode = r.readLine();
         fastSim = !simCode.equalsIgnoreCase("s");
         if (simCode.equalsIgnoreCase("f")) {
-            System.out.print("Outputfile: ");
+            System.out.print("  - Outputfile: ");
             String outFile = r.readLine();
             ps = new PrintStream(new FileOutputStream(outFile));
         } else {
@@ -62,8 +65,13 @@ public class Main {
 
         // Print the final configuration
         ps.println("\n" + config.toString());
-        ps.println("\nConsensus reached: " + protocol.consensus(config).get());
-        System.out.println("\nDone");
+        ps.print("\nConsensus reached: " + protocol.consensus(config).get());
+        if (ps != System.out) {
+            ps.close();
+            System.out.println("Done");
+        } else {
+        System.out.println(", Done");
+        }
     }
 
     public static boolean simulationStep(boolean fastSim, boolean snipeInNextStep) throws InterruptedException {
@@ -118,33 +126,33 @@ public class Main {
     }
 
     public static PopulationProtocol getProtocol(BufferedReader r) throws IOException {
-        System.out.print("Protocol to simulate? (p for Pebbles, t for Tower, i for InhomTower, s for SignedNumbers, f for file, a for and, o for or, n for negation, w for WeakConvert): ");
+        System.out.print("• Protocol to simulate? (p for Pebbles, t for Tower, i for InhomTower, s for SignedNumbers, f for file, a for and, o for or, n for negation, w for WeakConvert): ");
         String protocolCode = r.readLine();
 
         // Initialize the protocol
         if (protocolCode.equalsIgnoreCase("p")) {
-            System.out.print("Threshold t (t >= 1): ");
+            System.out.print("  - Threshold t (t >= 1): ");
             int t = Integer.parseInt(r.readLine());
             return new Pebbles(t);
         } else if (protocolCode.equalsIgnoreCase("t")) {
-            System.out.print("Threshold t (t >= 1): ");
+            System.out.print("  - Threshold t (t >= 1): ");
             int t = Integer.parseInt(r.readLine());
             return new Tower(t);
         } else if (protocolCode.equalsIgnoreCase("i")) {
-            System.out.print("Threshold t (t >= 1): ");
+            System.out.print("  - Threshold t (t >= 1): ");
             int t = Integer.parseInt(r.readLine());
-            System.out.print("Number of Dimensions: ");
+            System.out.print("  - Number of Dimensions: ");
             int count = Integer.parseInt(r.readLine());
             int[] a = new int[count];
             for (int i = 0; i < a.length; i++) {
-                System.out.print("a_" + i + " (in N): ");
+                System.out.print("  - a_" + i + " (in N): ");
                 a[i] = Integer.parseInt(r.readLine());
             }
             return new InhomTower(t, a);
         } else if (protocolCode.equalsIgnoreCase("s")) {
             return new SignedNumbers();
         } else if (protocolCode.equalsIgnoreCase("f")) {
-            System.out.print("File to read from: ");
+            System.out.print("  - File to read from: ");
             String file = r.readLine();
             return new FileProtocol(Files.readString(Path.of(file)).replace(" ", "").replace("\n", "").replace("\r", "").split(";"));
         } else if (protocolCode.equalsIgnoreCase("a")) {
@@ -160,27 +168,27 @@ public class Main {
     }
 
     public static WeakProtocol getWeakProtocol(BufferedReader r) throws IOException {
-        System.out.print("Weak Protocol to simulate? (g for GenMajority, i for InhomTowerCancle): ");
+        System.out.print("• Weak Protocol to simulate? (g for GenMajority, i for InhomTowerCancle): ");
         String protocolCode = r.readLine();
 
         // Initialize the protocol
         if (protocolCode.equalsIgnoreCase("g")) {
-            System.out.print("Number of Dimensions: ");
+            System.out.print("  - Number of Dimensions: ");
             int count = Integer.parseInt(r.readLine());
             int[] a = new int[count];
             for (int i = 0; i < a.length; i++) {
-                System.out.print("a_" + i + " (in Z): ");
+                System.out.print("  - a_" + i + " (in Z): ");
                 a[i] = Integer.parseInt(r.readLine());
             }
             return new GenMajority(a);
         } else if (protocolCode.equalsIgnoreCase("i")) {
-            System.out.print("Threshold t (t >= 1): ");
+            System.out.print("  - Threshold t (t >= 1): ");
             int t = Integer.parseInt(r.readLine());
-            System.out.print("Number of Dimensions: ");
+            System.out.print("  - Number of Dimensions: ");
             int count = Integer.parseInt(r.readLine());
             int[] a = new int[count];
             for (int i = 0; i < a.length; i++) {
-                System.out.print("a_" + i + " (in Z): ");
+                System.out.print("  - a_" + i + " (in Z): ");
                 a[i] = Integer.parseInt(r.readLine());
             }
             return new InhomTowerCancle(t, a);
