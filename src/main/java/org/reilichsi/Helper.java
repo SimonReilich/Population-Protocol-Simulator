@@ -42,7 +42,7 @@ public class Helper {
 
     public static Set<int[]> getSub(int[] x, int n) {
         if (Arrays.stream(x).allMatch(a -> a == 0)) {
-            return Set.of();
+            return Set.of(x);
         } else if (n > 0) {
             Set<int[]> result = new HashSet<>();
             for (int i = 0; i < x.length; i++) {
@@ -50,7 +50,7 @@ public class Helper {
                 if (xMod[i] > 0) {
                     xMod[i]--;
                 }
-                result.addAll(getSub(x, n - 1));
+                result.addAll(getSub(xMod, n - 1));
             }
             return result;
         } else {

@@ -2,6 +2,8 @@ package org.reilichsi.sniper;
 
 import org.reilichsi.Population;
 
+import java.io.PrintStream;
+
 public class NoSniper<T> extends Sniper<T> {
 
     public NoSniper() {
@@ -9,7 +11,7 @@ public class NoSniper<T> extends Sniper<T> {
     }
 
     @Override
-    public boolean snipe(Population<T> config, boolean fastSim) throws InterruptedException {
+    public boolean snipe(Population<T> config, boolean fastSim, PrintStream ps) throws InterruptedException {
         return false;
     }
 }

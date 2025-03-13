@@ -2,6 +2,8 @@ package org.reilichsi.sniper;
 
 import org.reilichsi.Population;
 
+import java.io.PrintStream;
+
 public class RandomSniper<T> extends Sniper<T> {
 
     private final double snipeRate;
@@ -24,7 +26,7 @@ public class RandomSniper<T> extends Sniper<T> {
     }
 
     @Override
-    public boolean snipe(Population<T> config, boolean fastSim) throws InterruptedException {
+    public boolean snipe(Population<T> config, boolean fastSim, PrintStream ps) throws InterruptedException {
         matchPopulationSize(config);
 
         boolean out = false;
@@ -47,7 +49,7 @@ public class RandomSniper<T> extends Sniper<T> {
                 Thread.sleep(1000);
             }
             if (toBeSniped > 0) {
-                System.out.println("\n" + config);
+                ps.println("\n" + config);
             }
         }
         return out;

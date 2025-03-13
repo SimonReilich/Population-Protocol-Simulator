@@ -3,9 +3,7 @@ package org.reilichsi;
 import org.reilichsi.protocols.*;
 import org.reilichsi.sniper.Sniper;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -14,6 +12,7 @@ public class Main {
     private static PopulationProtocol protocol;
     private static Population config;
     private static Sniper sniper;
+    private static PrintStream ps;
 
     public static void main(String[] args) throws IOException, InterruptedException {
 
@@ -21,7 +20,6 @@ public class Main {
         BufferedReader r = new BufferedReader(new InputStreamReader(System.in));
 
         protocol = getProtocol(r);
-        assert protocol != null;
 
         System.out.println("Protocol is computing the following predicate: " + protocol.PREDICATE.apply(0));
         int[] x = new int[protocol.ARG_LEN];
@@ -32,7 +30,6 @@ public class Main {
         }
 
         config = protocol.genConfig(x);
-        sniper = protocol.initializeSniper(r);
 
         int inTol = -1;
         if (!(protocol instanceof FileProtocol)) {
@@ -40,12 +37,22 @@ public class Main {
             System.out.println("Protocol with this input has the following initial tolerance: " + inTol);
         }
 
+        sniper = protocol.initializeSniper(r);
+
         boolean fastSim;
-        System.out.print("Fast simulation? (y/n): ");
-        fastSim = r.readLine().equalsIgnoreCase("y");
+        System.out.print("Simulation? (s for slow, i for instant, f for file): ");
+        String simCode = r.readLine();
+        fastSim = !simCode.equalsIgnoreCase("s");
+        if (simCode.equalsIgnoreCase("f")) {
+            System.out.print("Outputfile: ");
+            String outFile = r.readLine();
+            ps = new PrintStream(new FileOutputStream(outFile));
+        } else {
+            ps = System.out;
+        }
 
         System.out.println("\nStarting simulation...\n");
-        System.out.println(config.toString());
+        ps.println(config.toString());
 
         // Run the simulation
         boolean snipeInNextStep = true;
@@ -54,13 +61,14 @@ public class Main {
         }
 
         // Print the final configuration
-        System.out.println("\n" + config.toString());
-        System.out.println("\nConsensus reached: " + protocol.consensus(config).get());
+        ps.println("\n" + config.toString());
+        ps.println("\nConsensus reached: " + protocol.consensus(config).get());
+        System.out.println("\nDone");
     }
 
     public static boolean simulationStep(boolean fastSim, boolean snipeInNextStep) throws InterruptedException {
         if (snipeInNextStep) {
-            sniper.snipe(config, fastSim);
+            sniper.snipe(config, fastSim, ps);
         }
 
         // Pick a random pair of agents
@@ -81,7 +89,7 @@ public class Main {
         if (!fastSim) {
             Thread.sleep(1000);
         }
-        System.out.println("\n" + config.toString(agent1, agent2));
+        ps.println("\n" + config.toString(agent1, agent2));
         if (!fastSim) {
             Thread.sleep(1000);
         }
@@ -90,11 +98,11 @@ public class Main {
         config.set(agent1, newState.first());
         config.set(agent2, newState.second());
 
-        System.out.println("\n" + config.toString(agent1, agent2));
+        ps.println("\n" + config.toString(agent1, agent2));
         if (!fastSim) {
             Thread.sleep(1000);
         }
-        System.out.println("\n" + config.toString());
+        ps.println("\n" + config.toString());
 
         return true;
     }

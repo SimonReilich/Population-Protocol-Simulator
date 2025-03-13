@@ -3,6 +3,7 @@ package org.reilichsi.sniper;
 import org.reilichsi.Population;
 
 import java.io.IOException;
+import java.io.PrintStream;
 
 public class PerciseSniper<T> extends Sniper<T> {
 
@@ -14,7 +15,7 @@ public class PerciseSniper<T> extends Sniper<T> {
     }
 
     @Override
-    public boolean snipe(Population<T> config, boolean fastSim) throws InterruptedException {
+    public boolean snipe(Population<T> config, boolean fastSim, PrintStream ps) throws InterruptedException {
         super.matchPopulationSize(config);
 
         boolean out = false;
@@ -23,7 +24,7 @@ public class PerciseSniper<T> extends Sniper<T> {
             if (!fastSim) {
                 Thread.sleep(1000);
             }
-            System.out.println("\n" + config);
+            ps.println("\n" + config);
             out = true;
         }
         return out;

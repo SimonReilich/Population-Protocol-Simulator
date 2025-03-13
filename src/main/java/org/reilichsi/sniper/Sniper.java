@@ -2,6 +2,8 @@ package org.reilichsi.sniper;
 
 import org.reilichsi.Population;
 
+import java.io.PrintStream;
+
 public abstract class Sniper<T> {
 
     private int maxSnipes;
@@ -10,7 +12,7 @@ public abstract class Sniper<T> {
         this.maxSnipes = maxSnipes;
     }
 
-    public abstract boolean snipe(Population<T> config, boolean fastSim) throws InterruptedException;
+    public abstract boolean snipe(Population<T> config, boolean fastSim, PrintStream ps) throws InterruptedException;
 
     public boolean canSnipe() {
         return maxSnipes > 0;
