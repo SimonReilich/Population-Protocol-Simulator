@@ -1,5 +1,6 @@
 package org.reilichsi.protocols;
 
+import org.reilichsi.EitherOr;
 import org.reilichsi.Helper;
 import org.reilichsi.Pair;
 import org.reilichsi.Population;
@@ -10,7 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
-public class InhomTowerCancle extends WeakProtocol<Object> {
+public class InhomTowerCancle extends WeakProtocol<EitherOr<Integer, Pair<Integer, Integer>>> {
 
     private final int t;
     private final int[] a;
@@ -44,51 +45,51 @@ public class InhomTowerCancle extends WeakProtocol<Object> {
     }
 
     @Override
-    public Set<Object> getQ() {
-        Set<Object> set = new HashSet<>();
+    public Set<EitherOr<Integer, Pair<Integer, Integer>>> getQ() {
+        Set<EitherOr<Integer, Pair<Integer, Integer>>> set = new HashSet<>();
         for (int i = -Arrays.stream(this.a).max().getAsInt(); i <= 0; i++) {
-            set.add(i);
+            set.add(new EitherOr<>(i, null));
         }
         for (int i = 0; i <= this.T; i++) {
             for (int j = i + 1; j <= this.T; j++) {
-                set.add(new Pair<>(i, j));
+                set.add(new EitherOr<>(null, new Pair<>(i, j)));
             }
         }
         return set;
     }
 
     @Override
-    public Set<Object> getI() {
-        Set<Object> set = new HashSet<>();
+    public Set<EitherOr<Integer, Pair<Integer, Integer>>> getI() {
+        Set<EitherOr<Integer, Pair<Integer, Integer>>> set = new HashSet<>();
         for (int ai : this.a) {
-            set.add(new Pair<>(0, ai));
-            set.add(ai);
+            set.add(new EitherOr<>(null, new Pair<>(0, ai)));
+            set.add(new EitherOr<>(ai, null));
         }
         return set;
     }
 
     @Override
-    public Set<Pair<Object, Object>> delta(Object x, Object y) {
-        if (x instanceof Pair && y instanceof Pair && ((Pair<Integer, Integer>) x).first() <= ((Pair<Integer, Integer>) y).first() && ((Pair<Integer, Integer>) x).second() < this.T && ((Pair<Integer, Integer>) y).second() < this.T) {
+    public Set<Pair<EitherOr<Integer, Pair<Integer, Integer>>, EitherOr<Integer, Pair<Integer, Integer>>>> delta(EitherOr<Integer, Pair<Integer, Integer>> x, EitherOr<Integer, Pair<Integer, Integer>> y) {
+        if (x.isU() && y.isU() && x.getU().first() <= y.getU().first() && x.getU().second() < this.T && y.getU().second() < this.T) {
             // step
-            return Set.of(new Pair<>(x, new Pair<>(((Pair<Integer, Integer>) y).first() + 1, ((Pair<Integer, Integer>) y).second() + 1)));
-        } else if (x instanceof Pair && y instanceof Integer && ((int) y) != 0 && ((Pair<Integer, Integer>) x).first() < ((Pair<Integer, Integer>) x).second()) {
-            if (((Pair<Integer, Integer>) x).first() == ((Pair<Integer, Integer>) x).second() - 1) {
+            return Set.of(new Pair<>(x, new EitherOr<>(null, new Pair<>(y.getU().first() + 1, y.getU().second() + 1))));
+        } else if (x.isU() && y.isT() && y.getT() != 0 && x.getU().first() < x.getU().second()) {
+            if ((x.getU()).first() == x.getU().second() - 1) {
                 // cancel with empty intervall
-                return Set.of(new Pair<>(0, ((int) y) + 1));
+                return Set.of(new Pair<>(new EitherOr<>(0, null), new EitherOr<>(y.getT() + 1, null)));
             } else {
                 // cancel
-                return Set.of(new Pair<>(new Pair<>(((Pair<Integer, Integer>) x).first(), ((Pair<Integer, Integer>) x).second() - 1), ((int) y) + 1));
+                return Set.of(new Pair<>(new EitherOr<>(null, new Pair<>(x.getU().first(), x.getU().second() - 1)), new EitherOr<>(y.getT() + 1, null)));
             }
         }
         return Set.of();
     }
 
     @Override
-    public Optional<Boolean> output(Object state) {
-        if (state instanceof Integer && ((int) state) != 0) {
+    public Optional<Boolean> output(EitherOr<Integer, Pair<Integer, Integer>> state) {
+        if (state.isT() && state.getT() != 0) {
             return Optional.of(false);
-        } else if (state instanceof Pair && ((Pair<Integer, Integer>) state).second() >= this.t) {
+        } else if (state.isU() && state.getU().second() >= this.t) {
             return Optional.of(true);
         } else {
             return Optional.empty();
@@ -96,9 +97,9 @@ public class InhomTowerCancle extends WeakProtocol<Object> {
     }
 
     @Override
-    public Optional<Boolean> consensus(Population<Object> config) {
-        if (config.stream().filter(s -> s instanceof Integer).anyMatch(s -> ((int) s) != 0)) {
-            if (config.stream().anyMatch(s -> s instanceof Pair)) {
+    public Optional<Boolean> consensus(Population<EitherOr<Integer, Pair<Integer, Integer>>> config) {
+        if (config.stream().filter(EitherOr::isT).map(EitherOr::getT).anyMatch(s -> s != 0)) {
+            if (config.stream().anyMatch(EitherOr::isU)) {
                 return Optional.empty();
             }
             return Optional.of(false);
@@ -107,16 +108,16 @@ public class InhomTowerCancle extends WeakProtocol<Object> {
     }
 
     @Override
-    public Population<Object> genConfig(int... x) {
-        Population<Object> config = new Population<>();
+    public Population<EitherOr<Integer, Pair<Integer, Integer>>> genConfig(int... x) {
+        Population<EitherOr<Integer, Pair<Integer, Integer>>> config = new Population<>();
         for (int i = 0; i < x.length; i++) {
             if (this.a[i] > 0) {
                 for (int j = 0; j < x[i]; j++) {
-                    config.add(new Pair<>(0, this.a[i]));
+                    config.add(new EitherOr<>(null, new Pair<>(0, this.a[i])));
                 }
             } else {
                 for (int j = 0; j < x[i]; j++) {
-                    config.add(this.a[i]);
+                    config.add(new EitherOr<>(this.a[i], null));
                 }
             }
         }
@@ -124,16 +125,16 @@ public class InhomTowerCancle extends WeakProtocol<Object> {
     }
 
     @Override
-    public Object stateFromString(String s) {
+    public EitherOr<Integer, Pair<Integer, Integer>> stateFromString(String s) {
         try {
-            return Integer.parseInt(s);
+            return new EitherOr<>(Integer.parseInt(s), null);
         } catch (NumberFormatException e) {
             s = s.trim();
             for (int i = s.indexOf(';'); i < s.length(); i++) {
                 String first = s.substring(1, i).trim();
                 String second = s.substring(i + 2, s.length() - 1).trim();
                 if (Helper.countChar(first, '(') - Helper.countChar(first, ')') == 0 && Helper.countChar(second, '(') - Helper.countChar(second, ')') == 0) {
-                    return new Pair<>(Integer.parseInt(first), Integer.parseInt(second));
+                    return new EitherOr<>(null, new Pair<>(Integer.parseInt(first), Integer.parseInt(second)));
                 }
             }
             throw new IllegalArgumentException("Invalid state: " + s);
