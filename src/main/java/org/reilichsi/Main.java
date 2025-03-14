@@ -126,7 +126,7 @@ public class Main {
     }
 
     public static PopulationProtocol getProtocol(BufferedReader r) throws IOException {
-        System.out.print("• Protocol to simulate? (p for Pebbles, t for Tower, i for InhomTower, s for SignedNumbers, f for file, a for and, o for or, n for negation, w for WeakConvert): ");
+        System.out.print("• Protocol to simulate? (p for Pebbles, t for Tower, i for InhomTower, b for BoolCombThreshold, s for SignedNumbers, f for file, a for and, o for or, n for negation, w for WeakConvert): ");
         String protocolCode = r.readLine();
 
         // Initialize the protocol
@@ -149,6 +149,8 @@ public class Main {
                 a[i] = Integer.parseInt(r.readLine());
             }
             return new InhomTower(t, a);
+        } else if (protocolCode.equalsIgnoreCase("b")) {
+            return new BoolCombThreshold(new UnaryThresholdPred(new UnaryThresholdPred(true, 6), true, new UnaryThresholdPred(false, 3)));
         } else if (protocolCode.equalsIgnoreCase("s")) {
             return new SignedNumbers();
         } else if (protocolCode.equalsIgnoreCase("f")) {
