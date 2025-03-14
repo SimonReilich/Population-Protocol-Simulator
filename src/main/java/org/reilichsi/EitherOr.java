@@ -38,4 +38,13 @@ public class EitherOr<T, U> {
     public boolean isU() {
         return u != null;
     }
+
+    @Override
+    public String toString() {
+        if (this.isT()) {
+            return this.getT().toString();
+        } else {
+            return this.getU().toString();
+        }
+    }
 }

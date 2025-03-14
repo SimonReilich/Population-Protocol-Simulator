@@ -26,7 +26,7 @@ public class InhomTowerCancle extends WeakProtocol<EitherOr<Integer, Pair<Intege
         for (int i = 1; i < a.length; i++) {
             Function<Integer, String> finalP = p;
             int finalI = i;
-            p = n -> finalP.apply(n) + "(" + a[finalI] + " * x_" + (n + finalI) + ")";
+            p = n -> finalP.apply(n) + " + (" + a[finalI] + " * x_" + (n + finalI) + ")";
         }
         Function<Integer, String> finalP = p;
         super.PREDICATE = n -> finalP.apply(n) + " >= " + t;
@@ -41,7 +41,12 @@ public class InhomTowerCancle extends WeakProtocol<EitherOr<Integer, Pair<Intege
 
     @Override
     public boolean predicate(int... x) {
-        return false;
+        assertArgLength(x);
+        int c = 0;
+        for (int i = 0; i < x.length; i++) {
+            c += this.a[i] * x[i];
+        }
+        return c >= this.t;
     }
 
     @Override

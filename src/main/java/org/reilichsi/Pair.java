@@ -10,8 +10,22 @@ public record Pair<T, S>(T first, S second) {
         return false;
     }
 
+    private String formatT(T state) {
+        if (state instanceof Boolean) {
+            return ((boolean) state) ? "+" : "-";
+        }
+        return state.toString();
+    }
+
+    private String formatS(S state) {
+        if (state instanceof Boolean) {
+            return ((boolean) state) ? "+" : "-";
+        }
+        return state.toString();
+    }
+
     @Override
     public String toString() {
-        return "(" + this.first + "; " + this.second + ")";
+        return "(" + this.formatT(this.first) + "; " + this.formatS(this.second) + ")";
     }
 }

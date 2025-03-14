@@ -99,21 +99,28 @@ public class Population<T> {
         return false;
     }
 
+    private String format(T state) {
+        if (state instanceof Boolean) {
+            return ((boolean) state) ? "+" : "-";
+        }
+        return state.toString();
+    }
+
     private String toStringArgs(Integer... selected) {
         StringBuilder sb = new StringBuilder();
         sb.append("|");
         for (int i = 0; i < population.size(); i++) {
             if (Arrays.asList(selected).contains(i)) {
                 if (active.get(i)) {
-                    sb.append(" * ").append(population.get(i)).append(" * ").append("|");
+                    sb.append(" *").append(population.get(i)).append("* ").append("|");
                 } else {
-                    sb.append(" *-").append(population.get(i).toString()).append("-* ").append("|");
+                    throw new IllegalStateException("Inactive agent cant be selected");
                 }
             } else {
                 if (active.get(i)) {
-                    sb.append("   ").append(population.get(i)).append("   ").append("|");
+                    sb.append("  ").append(population.get(i)).append("  ").append("|");
                 } else {
-                    sb.append("  -").append(population.get(i).toString()).append("-  ").append("|");
+                    sb.append(" -").append(population.get(i).toString()).append("- ").append("|");
                 }
             }
         }
