@@ -29,7 +29,7 @@ public class MultiSniper<T> extends Sniper<T> {
             }
         }
         if (out) {
-            ps.println("\n" + config.toString());
+            ps.println("\n" + config);
         }
         return out;
     }

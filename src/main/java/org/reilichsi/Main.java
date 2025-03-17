@@ -1,5 +1,8 @@
 package org.reilichsi;
 
+import org.reilichsi.predicates.BooleanCombination;
+import org.reilichsi.predicates.PressburgerPred;
+import org.reilichsi.predicates.UnaryThresholdPred;
 import org.reilichsi.protocols.*;
 import org.reilichsi.sniper.Sniper;
 
@@ -150,7 +153,7 @@ public class Main {
             }
             return new InhomTower(t, a);
         } else if (protocolCode.equalsIgnoreCase("b")) {
-            return new BoolCombThreshold(new UnaryThresholdPred(new UnaryThresholdPred(true, 6), true, new UnaryThresholdPred(false, 3)));
+            return new BoolCombThreshold(new BooleanCombination<>(new BooleanCombination<>(new UnaryThresholdPred(6, PressburgerPred.UB, 1, 1)), PressburgerPred.AND, new BooleanCombination<>(new UnaryThresholdPred(3, PressburgerPred.LB, 1, 1))));
         } else if (protocolCode.equalsIgnoreCase("s")) {
             return new SignedNumbers();
         } else if (protocolCode.equalsIgnoreCase("f")) {

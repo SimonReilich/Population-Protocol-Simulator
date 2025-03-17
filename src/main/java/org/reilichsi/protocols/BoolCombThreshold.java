@@ -3,27 +3,28 @@ package org.reilichsi.protocols;
 import org.reilichsi.Helper;
 import org.reilichsi.Pair;
 import org.reilichsi.Population;
-import org.reilichsi.UnaryThresholdPred;
+import org.reilichsi.predicates.BooleanCombination;
+import org.reilichsi.predicates.UnaryThresholdPred;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class BoolCombThreshold extends PopulationProtocol<Pair<Integer, Integer>> {
 
-    private final UnaryThresholdPred p;
+    private final BooleanCombination<UnaryThresholdPred> p;
     private final int cm;
 
-    public BoolCombThreshold(UnaryThresholdPred predicate) {
-        super(1, predicate.toStringFunc());
+    public BoolCombThreshold(BooleanCombination<UnaryThresholdPred> predicate) {
+        super(1, n -> "(" + predicate.toString() + ") [Variable counting not supported]");
         this.p = predicate;
-        this.cm = predicate.getConstants().stream().max(Integer::compareTo).get();
+        this.cm = predicate.getLimits().stream().max(Integer::compareTo).get();
     }
 
     @Override
     public boolean predicate(int... x) {
         assertArgLength(x);
-        return this.p.apply(x[0]);
+        Map<Integer, Integer> map = new HashMap<>();
+        map.put(1, x[0]);
+        return this.p.apply(map);
     }
 
     @Override
@@ -55,14 +56,18 @@ public class BoolCombThreshold extends PopulationProtocol<Pair<Integer, Integer>
 
     @Override
     public boolean output(Pair<Integer, Integer> state) {
-        return p.apply(state.second());
+        Map<Integer, Integer> map = new HashMap<>();
+        map.put(1, state.second());
+        return p.apply(map);
     }
 
     @Override
     public Optional<Boolean> consensus(Population<Pair<Integer, Integer>> config) {
         if (config.stream().map(Pair::first).distinct().count() == config.size()) {
             if (config.stream().map(Pair::second).distinct().count() == 1) {
-                return Optional.of(this.p.apply(config.stream().map(Pair::second).findFirst().get()));
+                Map<Integer, Integer> map = new HashMap<>();
+                map.put(1, config.stream().findFirst().get().second());
+                return Optional.of(this.p.apply(map));
             } else {
                 return Optional.empty();
             }
