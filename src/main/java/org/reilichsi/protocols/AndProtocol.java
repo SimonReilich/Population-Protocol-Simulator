@@ -13,7 +13,7 @@ public class AndProtocol<T, U> extends PopulationProtocol<Pair<T, U>> {
     private final PopulationProtocol<U> p2;
 
     public AndProtocol(PopulationProtocol<T> protocol1, PopulationProtocol<U> protocol2) {
-        super(protocol1.ARG_LEN + protocol2.ARG_LEN, n -> "(" + protocol1.PREDICATE.apply(n) + ") & (" + protocol2.PREDICATE.apply(n + protocol1.ARG_LEN) + ")");
+        super(protocol1.ARG_LEN * protocol2.ARG_LEN, n -> "(" + protocol1.PREDICATE.apply(n) + ") & (" + protocol2.PREDICATE.apply(n + protocol1.ARG_LEN) + ")");
         this.p1 = protocol1;
         this.p2 = protocol2;
     }
@@ -21,7 +21,15 @@ public class AndProtocol<T, U> extends PopulationProtocol<Pair<T, U>> {
     @Override
     public boolean predicate(int... x) {
         super.assertArgLength(x);
-        return this.p1.predicate(Arrays.copyOfRange(x, 0, this.p1.ARG_LEN)) && this.p2.predicate(Arrays.copyOfRange(x, this.p1.ARG_LEN, this.p1.ARG_LEN + this.p2.ARG_LEN));
+        int[] x1 = new int[this.p1.ARG_LEN];
+        int[] x2 = new int[this.p2.ARG_LEN];
+        for (int i = 0; i < this.p1.ARG_LEN; i++) {
+            for (int j = 0; j < this.p2.ARG_LEN; j++) {
+                x1[i] += x[i * this.p1.ARG_LEN + j];
+                x2[j] += x[i * this.p1.ARG_LEN + j];
+            }
+        }
+        return this.p1.predicate(x1) && this.p2.predicate(x2);
     }
 
     @Override
@@ -78,7 +86,15 @@ public class AndProtocol<T, U> extends PopulationProtocol<Pair<T, U>> {
 
     @Override
     public Population<Pair<T, U>> genConfig(int... x) {
-        throw new UnsupportedOperationException("The configuration should be created by the calling method using proto1 and proto2");
+        Population<Pair<T, U>> config = new Population<>();
+        for (int i = 0; i < this.p1.ARG_LEN; i++) {
+            for (int j = 0; j < this.p2.ARG_LEN; j++) {
+                for (int k = 0; k < x[i * this.p1.ARG_LEN + j]; k++) {
+                    config.add(new Pair<>(this.p1.genConfig(i).get(0), this.p2.genConfig(j).get(0)));
+                }
+            }
+        }
+        return config;
     }
 
     @Override

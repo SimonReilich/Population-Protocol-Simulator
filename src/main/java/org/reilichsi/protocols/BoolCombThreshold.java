@@ -4,16 +4,17 @@ import org.reilichsi.Helper;
 import org.reilichsi.Pair;
 import org.reilichsi.Population;
 import org.reilichsi.predicates.BooleanCombination;
+import org.reilichsi.predicates.UnaryCondition;
 import org.reilichsi.predicates.UnaryThresholdPred;
 
 import java.util.*;
 
 public class BoolCombThreshold extends PopulationProtocol<Pair<Integer, Integer>> {
 
-    private final BooleanCombination<UnaryThresholdPred> p;
+    private final BooleanCombination<UnaryCondition> p;
     private final int cm;
 
-    public BoolCombThreshold(BooleanCombination<UnaryThresholdPred> predicate) {
+    public BoolCombThreshold(BooleanCombination<UnaryCondition> predicate) {
         super(1, n -> "(" + predicate.toString() + ") [Variable counting not supported]");
         this.p = predicate;
         this.cm = predicate.getLimits().stream().max(Integer::compareTo).get();
@@ -63,7 +64,7 @@ public class BoolCombThreshold extends PopulationProtocol<Pair<Integer, Integer>
 
     @Override
     public Optional<Boolean> consensus(Population<Pair<Integer, Integer>> config) {
-        if (config.stream().map(Pair::first).distinct().count() == config.size()) {
+        if (config.stream().map(Pair::first).distinct().count() == config.sizeActive()) {
             if (config.stream().map(Pair::second).distinct().count() == 1) {
                 Map<Integer, Integer> map = new HashMap<>();
                 map.put(1, config.stream().findFirst().get().second());

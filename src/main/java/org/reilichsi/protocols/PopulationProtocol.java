@@ -133,4 +133,38 @@ public abstract class PopulationProtocol<T> {
             return new NoSniper<>();
         }
     }
+
+    /**
+     * Initializes a sniper based on user input.
+     * Prompts the user to select the type of sniper to initialize: Random, Precise, Multi, or None.
+     *
+     * @param r a BufferedReader to read user input
+     * @param max the maximum amount of snipes
+     * @return an instance of Sniper<T> corresponding to the user's input
+     * @throws IOException if an I/O error occurs while reading input
+     */
+    public Sniper<T> initializeSniper(BufferedReader r, int max) throws IOException {
+        System.out.print("• Kind of sniper? (r for random, p for percise, m for multi, n for none): ");
+        String sniperCode = r.readLine();
+
+        if (sniperCode.equalsIgnoreCase("r")) {
+            System.out.print("  - Average agents deactivated per round: ");
+            double snipeRate = Double.parseDouble(r.readLine());
+            return new RandomSniper<>(max, snipeRate);
+        } else if (sniperCode.equalsIgnoreCase("p")) {
+            System.out.print("  - Target: ");
+            T target = this.stateFromString(r.readLine());
+            return new PerciseSniper<>(max, target);
+        } else if (sniperCode.equalsIgnoreCase("m")) {
+            System.out.print("  - Number of Snipers: ");
+            int count = Integer.parseInt(r.readLine());
+            Sniper<T>[] snipers = new Sniper[count];
+            for (int i = 0; i < count; i++) {
+                snipers[i] = this.initializeSniper(r);
+            }
+            return new MultiSniper<>(max, snipers);
+        } else {
+            return new NoSniper<>();
+        }
+    }
 }

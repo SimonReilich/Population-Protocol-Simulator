@@ -35,14 +35,14 @@ public class Main {
 
         config = protocol.genConfig(x);
 
-        int inTol = -1;
+        int inTol = config.size() - 1;
         if (!(protocol instanceof FileProtocol)) {
             inTol = calculateInTol(x);
             System.out.println("• Protocol with this input has the following initial tolerance: " + inTol);
         }
 
         System.out.println("\nInitializing sniper");
-        sniper = protocol.initializeSniper(r);
+        sniper = protocol.initializeSniper(r, inTol);
 
         System.out.println("\nInitializing simulation");
         boolean fastSim;
@@ -153,7 +153,7 @@ public class Main {
             }
             return new InhomTower(t, a);
         } else if (protocolCode.equalsIgnoreCase("b")) {
-            return new BoolCombThreshold(new BooleanCombination<>(new BooleanCombination<>(new UnaryThresholdPred(6, PressburgerPred.UB, 1, 1)), PressburgerPred.AND, new BooleanCombination<>(new UnaryThresholdPred(3, PressburgerPred.LB, 1, 1))));
+            return new BoolCombThreshold(new BooleanCombination<>(new BooleanCombination<>(new UnaryThresholdPred(10, PressburgerPred.UB, 1, 1)), PressburgerPred.AND, new BooleanCombination<>(new UnaryThresholdPred(5, PressburgerPred.LB, 1, 1))));
         } else if (protocolCode.equalsIgnoreCase("s")) {
             return new SignedNumbers();
         } else if (protocolCode.equalsIgnoreCase("f")) {
