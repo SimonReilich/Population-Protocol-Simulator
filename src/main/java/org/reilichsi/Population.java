@@ -1,5 +1,9 @@
 package org.reilichsi;
 
+import org.reilichsi.protocols.PopulationProtocol;
+import org.reilichsi.protocols.Protocol;
+import org.reilichsi.protocols.WeakProtocol;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -8,11 +12,13 @@ import java.util.stream.Stream;
 
 public class Population<T> {
 
+    private final Protocol<T> protocol;
     private final List<T> population;
     private final List<Boolean> active;
 
     @SafeVarargs
-    public Population(T... input) {
+    public Population(Protocol<T> protocol, T... input) {
+        this.protocol = protocol;
         population = new ArrayList<>();
         population.addAll(Arrays.asList(input));
         active = new ArrayList<>();
@@ -21,7 +27,29 @@ public class Population<T> {
         }
     }
 
-    public Population(Set<T> input) {
+    public Population(Protocol<T> protocol, Set<T> input) {
+        this.protocol = protocol;
+        population = new ArrayList<>();
+        population.addAll(input);
+        active = new ArrayList<>();
+        for (int i = 0; i < input.size(); i++) {
+            active.add(true);
+        }
+    }
+
+    @SafeVarargs
+    public Population(WeakProtocol<T> protocol, T... input) {
+        this.protocol = protocol;
+        population = new ArrayList<>();
+        population.addAll(Arrays.asList(input));
+        active = new ArrayList<>();
+        for (int i = 0; i < input.length; i++) {
+            active.add(true);
+        }
+    }
+
+    public Population(WeakProtocol<T> protocol, Set<T> input) {
+        this.protocol = protocol;
         population = new ArrayList<>();
         population.addAll(input);
         active = new ArrayList<>();
@@ -112,15 +140,15 @@ public class Population<T> {
         for (int i = 0; i < population.size(); i++) {
             if (Arrays.asList(selected).contains(i)) {
                 if (active.get(i)) {
-                    sb.append(" *").append(population.get(i)).append("* ").append("|");
+                    sb.append(" *").append(protocol.stateToString(population.get(i))).append("* ").append("|");
                 } else {
                     throw new IllegalStateException("Inactive agent cant be selected");
                 }
             } else {
                 if (active.get(i)) {
-                    sb.append("  ").append(population.get(i)).append("  ").append("|");
+                    sb.append("  ").append(protocol.stateToString(population.get(i))).append("  ").append("|");
                 } else {
-                    sb.append(" -").append(population.get(i).toString()).append("- ").append("|");
+                    sb.append(" -").append(protocol.stateToString(population.get(i))).append("- ").append("|");
                 }
             }
         }

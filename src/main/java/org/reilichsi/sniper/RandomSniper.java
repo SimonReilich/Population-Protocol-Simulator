@@ -1,6 +1,7 @@
 package org.reilichsi.sniper;
 
 import org.reilichsi.Population;
+import org.reilichsi.protocols.PopulationProtocol;
 
 import java.io.PrintStream;
 
@@ -8,8 +9,8 @@ public class RandomSniper<T> extends Sniper<T> {
 
     private final double snipeRate;
 
-    public RandomSniper(int maxSnipes, double snipeRate) {
-        super(maxSnipes);
+    public RandomSniper(PopulationProtocol<T> protocol, int maxSnipes, double snipeRate) {
+        super(protocol, maxSnipes);
         this.snipeRate = snipeRate;
     }
 

@@ -114,7 +114,7 @@ public class InhomTowerCancle extends WeakProtocol<EitherOr<Integer, Pair<Intege
 
     @Override
     public Population<EitherOr<Integer, Pair<Integer, Integer>>> genConfig(int... x) {
-        Population<EitherOr<Integer, Pair<Integer, Integer>>> config = new Population<>();
+        Population<EitherOr<Integer, Pair<Integer, Integer>>> config = new Population<>(this);
         for (int i = 0; i < x.length; i++) {
             if (this.a[i] > 0) {
                 for (int j = 0; j < x[i]; j++) {

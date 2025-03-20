@@ -92,7 +92,7 @@ public class GenMajority extends WeakProtocol<Integer> {
     @Override
     public Population<Integer> genConfig(int... x) {
         assertArgLength(x);
-        Population<Integer> config = new Population<>();
+        Population<Integer> config = new Population<>(this);
         for (int i = 0; i < x.length; i++) {
             for (int j = 0; j < x[i]; j++) {
                 config.add(this.a[i]);

@@ -61,7 +61,7 @@ public class WeakConvert<T> extends PopulationProtocol<Pair<T, Boolean>> {
     @Override
     public Optional<Boolean> consensus(Population<Pair<T, Boolean>> config) {
         List<T> list = config.stream().map(Pair::first).toList();
-        Population<T> weakPop = new Population<>();
+        Population<T> weakPop = new Population<>(this.w);
         for (T s : list) {
             weakPop.add(s);
         }
@@ -72,7 +72,7 @@ public class WeakConvert<T> extends PopulationProtocol<Pair<T, Boolean>> {
     public Population<Pair<T, Boolean>> genConfig(int... x) {
         assertArgLength(x);
         List<Pair<T, Boolean>> weakPopulation = this.w.genConfig(x).stream().map(s -> this.w.output(s).isPresent() ? new Pair<>(s, this.w.output(s).get()) : new Pair<>(s, false)).toList();
-        return new Population<Pair<T, Boolean>>(weakPopulation.toArray(new Pair[0]));
+        return new Population<Pair<T, Boolean>>(this, weakPopulation.toArray(new Pair[0]));
     }
 
     @Override

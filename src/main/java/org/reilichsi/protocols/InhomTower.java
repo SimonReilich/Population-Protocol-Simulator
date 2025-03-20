@@ -91,7 +91,7 @@ public class InhomTower extends PopulationProtocol<Pair<Integer, Integer>> {
     @Override
     public Population<Pair<Integer, Integer>> genConfig(int... x) {
         super.assertArgLength(x);
-        Population<Pair<Integer, Integer>> config = new Population<>();
+        Population<Pair<Integer, Integer>> config = new Population<>(this);
         for (int i = 0; i < super.ARG_LEN; i++) {
             for (int j = 0; j < x[i]; j++) {
                 config.add(new Pair<>(0, this.a[i]));

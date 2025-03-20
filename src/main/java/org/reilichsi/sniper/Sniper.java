@@ -1,14 +1,18 @@
 package org.reilichsi.sniper;
 
 import org.reilichsi.Population;
+import org.reilichsi.protocols.PopulationProtocol;
 
 import java.io.PrintStream;
 
 public abstract class Sniper<T> {
 
+    private PopulationProtocol<T> protocol;
+
     private int maxSnipes;
 
-    public Sniper(int maxSnipes) {
+    public Sniper(PopulationProtocol<T> protocol, int maxSnipes) {
+        this.protocol = protocol;
         this.maxSnipes = maxSnipes;
     }
 

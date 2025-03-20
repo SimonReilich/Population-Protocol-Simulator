@@ -75,8 +75,8 @@ public class AndProtocol<T, U> extends PopulationProtocol<Pair<T, U>> {
 
     @Override
     public Optional<Boolean> consensus(Population<Pair<T, U>> config) {
-        Population<T> config1 = new Population<>(config.stream().map(Pair::first).filter(Objects::nonNull).collect(Collectors.toSet()));
-        Population<U> config2 = new Population<>(config.stream().map(Pair::second).filter(Objects::nonNull).collect(Collectors.toSet()));
+        Population<T> config1 = new Population<>(this.p1, config.stream().map(Pair::first).filter(Objects::nonNull).collect(Collectors.toSet()));
+        Population<U> config2 = new Population<>(this.p2, config.stream().map(Pair::second).filter(Objects::nonNull).collect(Collectors.toSet()));
         if (this.p1.consensus(config1).isPresent() && this.p2.consensus(config2).isPresent()) {
             return Optional.of(this.p1.consensus(config1).get() && this.p2.consensus(config2).get());
         } else {
@@ -86,7 +86,7 @@ public class AndProtocol<T, U> extends PopulationProtocol<Pair<T, U>> {
 
     @Override
     public Population<Pair<T, U>> genConfig(int... x) {
-        Population<Pair<T, U>> config = new Population<>();
+        Population<Pair<T, U>> config = new Population<>(this);
         for (int i = 0; i < this.p1.ARG_LEN; i++) {
             for (int j = 0; j < this.p2.ARG_LEN; j++) {
                 for (int k = 0; k < x[i * this.p1.ARG_LEN + j]; k++) {

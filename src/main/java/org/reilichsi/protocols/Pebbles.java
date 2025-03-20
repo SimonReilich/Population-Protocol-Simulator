@@ -74,7 +74,7 @@ public class Pebbles extends PopulationProtocol<Integer> {
     @Override
     public Population<Integer> genConfig(int... x) {
         assertArgLength(x);
-        Population<Integer> config = new Population<>();
+        Population<Integer> config = new Population<>(this);
         for (int i = 0; i < x[0]; i++) {
             config.add(1);
         }

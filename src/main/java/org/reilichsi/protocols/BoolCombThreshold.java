@@ -80,7 +80,7 @@ public class BoolCombThreshold extends PopulationProtocol<Pair<Integer, Integer>
     @Override
     public Population<Pair<Integer, Integer>> genConfig(int... x) {
         assertArgLength(x);
-        Population<Pair<Integer, Integer>> config = new Population<>();
+        Population<Pair<Integer, Integer>> config = new Population<>(this);
         for (int i = 0; i < x[0]; i++) {
             config.add(new Pair<>(1, 1));
         }

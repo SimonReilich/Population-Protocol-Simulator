@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
-public abstract class PopulationProtocol<T> {
+public abstract class PopulationProtocol<T> implements Protocol<T> {
 
     public final int ARG_LEN;
     public Function<Integer, String> PREDICATE;
@@ -87,15 +87,6 @@ public abstract class PopulationProtocol<T> {
     }
 
     /**
-     * Parses a string representation of a state into the corresponding state of type T.
-     *
-     * @param s a string representation of a state
-     * @return the state of type T represented by the string
-     * @throws IllegalArgumentException if the string is not a valid representation of a state
-     */
-    public abstract T stateFromString(String s);
-
-    /**
      * Initializes a sniper based on user input.
      * Prompts the user to select the type of sniper to initialize: Random, Precise, Multi, or None.
      *
@@ -112,13 +103,13 @@ public abstract class PopulationProtocol<T> {
             int maxSnipes = Integer.parseInt(r.readLine());
             System.out.print("  - Average agents deactivated per round: ");
             double snipeRate = Double.parseDouble(r.readLine());
-            return new RandomSniper<>(maxSnipes, snipeRate);
+            return new RandomSniper<>(this, maxSnipes, snipeRate);
         } else if (sniperCode.equalsIgnoreCase("p")) {
             System.out.print("  - Maximum amount of Snipes: ");
             int maxSnipes = Integer.parseInt(r.readLine());
             System.out.print("  - Target: ");
             T target = this.stateFromString(r.readLine());
-            return new PerciseSniper<>(maxSnipes, target);
+            return new PerciseSniper<>(this, maxSnipes, target);
         } else if (sniperCode.equalsIgnoreCase("m")) {
             System.out.print("  - Maximum amount of Snipes: ");
             int maxSnipes = Integer.parseInt(r.readLine());
@@ -128,7 +119,7 @@ public abstract class PopulationProtocol<T> {
             for (int i = 0; i < count; i++) {
                 snipers[i] = this.initializeSniper(r);
             }
-            return new MultiSniper<>(maxSnipes, snipers);
+            return new MultiSniper<>(this, maxSnipes, snipers);
         } else {
             return new NoSniper<>();
         }
@@ -150,11 +141,11 @@ public abstract class PopulationProtocol<T> {
         if (sniperCode.equalsIgnoreCase("r")) {
             System.out.print("  - Average agents deactivated per round: ");
             double snipeRate = Double.parseDouble(r.readLine());
-            return new RandomSniper<>(max, snipeRate);
+            return new RandomSniper<>(this, max, snipeRate);
         } else if (sniperCode.equalsIgnoreCase("p")) {
             System.out.print("  - Target: ");
             T target = this.stateFromString(r.readLine());
-            return new PerciseSniper<>(max, target);
+            return new PerciseSniper<>(this, max, target);
         } else if (sniperCode.equalsIgnoreCase("m")) {
             System.out.print("  - Number of Snipers: ");
             int count = Integer.parseInt(r.readLine());
@@ -162,7 +153,7 @@ public abstract class PopulationProtocol<T> {
             for (int i = 0; i < count; i++) {
                 snipers[i] = this.initializeSniper(r);
             }
-            return new MultiSniper<>(max, snipers);
+            return new MultiSniper<>(this, max, snipers);
         } else {
             return new NoSniper<>();
         }

@@ -86,7 +86,7 @@ public class FileProtocol extends PopulationProtocol<String> {
     @Override
     public Population<String> genConfig(int... x) {
         super.assertArgLength(x);
-        Population<String> config = new Population<>();
+        Population<String> config = new Population<>(this);
         for (int i = 0; i < super.ARG_LEN; i++) {
             for (int j = 0; j < x[i]; j++) {
                 config.add(this.I[i]);

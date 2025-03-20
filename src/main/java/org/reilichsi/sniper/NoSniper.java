@@ -7,7 +7,7 @@ import java.io.PrintStream;
 public class NoSniper<T> extends Sniper<T> {
 
     public NoSniper() {
-        super(0);
+        super(null, 0);
     }
 
     @Override

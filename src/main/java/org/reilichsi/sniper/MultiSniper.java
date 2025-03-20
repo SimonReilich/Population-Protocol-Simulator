@@ -1,6 +1,7 @@
 package org.reilichsi.sniper;
 
 import org.reilichsi.Population;
+import org.reilichsi.protocols.PopulationProtocol;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -9,8 +10,8 @@ public class MultiSniper<T> extends Sniper<T> {
 
     private final Sniper<T>[] snipers;
 
-    public MultiSniper(int maxSnipes, Sniper<T>... snipers) {
-        super(maxSnipes);
+    public MultiSniper(PopulationProtocol<T> protocol, int maxSnipes, Sniper<T>... snipers) {
+        super(protocol, maxSnipes);
         this.snipers = snipers;
     }
 

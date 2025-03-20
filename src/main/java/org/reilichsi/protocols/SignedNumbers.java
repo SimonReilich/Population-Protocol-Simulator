@@ -79,7 +79,7 @@ public class SignedNumbers extends PopulationProtocol<Pair<Boolean, Integer>> {
 
     @Override
     public Population<Pair<Boolean, Integer>> genConfig(int... x) {
-        Population<Pair<Boolean, Integer>> config = new Population<>();
+        Population<Pair<Boolean, Integer>> config = new Population<>(this);
         for (int i = 0; i < x[0]; i++) {
             config.add(new Pair<>(true, 1));
         }

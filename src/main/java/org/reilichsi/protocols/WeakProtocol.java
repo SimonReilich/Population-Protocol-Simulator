@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
-public abstract class WeakProtocol<T> {
+public abstract class WeakProtocol<T> implements Protocol<T> {
 
     public final int ARG_LEN;
     public Function<Integer, String> PREDICATE;
@@ -82,13 +82,4 @@ public abstract class WeakProtocol<T> {
             throw new IllegalArgumentException("The number of arguments must be the same as the number of arguments");
         }
     }
-
-    /**
-     * Parses a string representation of a state into the corresponding state of type T.
-     *
-     * @param s a string representation of a state
-     * @return the state of type T represented by the string
-     * @throws IllegalArgumentException if the string is not a valid representation of a state
-     */
-    public abstract T stateFromString(String s);
 }
