@@ -157,7 +157,18 @@ public class Main {
         } else if (protocolCode.equalsIgnoreCase("s")) {
             return new SignedNumbers();
         } else if (protocolCode.equalsIgnoreCase("l")) {
-            return new BigModulo(6, 10, 1);
+            System.out.print("  - Threshold t (t >= 1): ");
+            int t = Integer.parseInt(r.readLine());
+            System.out.print("  - Modulus m (m > " + t + "): ");
+            int m = Integer.parseInt(r.readLine());
+            System.out.print("  - Number of Dimensions: ");
+            int count = Integer.parseInt(r.readLine());
+            int[] a = new int[count];
+            for (int i = 0; i < a.length; i++) {
+                System.out.print("  - a_" + i + " (in N+): ");
+                a[i] = Integer.parseInt(r.readLine());
+            }
+            return new BigModulo(t, m, a);
         } else if (protocolCode.equalsIgnoreCase("f")) {
             System.out.print("  - File to read from: ");
             String file = r.readLine();

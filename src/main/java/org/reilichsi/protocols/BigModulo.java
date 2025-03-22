@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 public class BigModulo extends PopulationProtocol<Pair<Integer, Pair<Integer[], Boolean[]>>> {
 
@@ -16,6 +17,17 @@ public class BigModulo extends PopulationProtocol<Pair<Integer, Pair<Integer[], 
 
     public BigModulo(int t, int m, int... a) {
         super(a.length , n -> "");
+
+        // generating String-representation for predicate
+        Function<Integer, String> p = n -> "(" + a[0] + " * x_" + n + ")";
+        for (int i = 1; i < a.length; i++) {
+            Function<Integer, String> finalP = p;
+            int finalI = i;
+            p = n -> finalP.apply(n) + " + (" + a[finalI] + " * x_" + (n + finalI) + ")";
+        }
+        Function<Integer, String> finalP = p;
+        super.PREDICATE = n -> finalP.apply(n) + " mod " + m + " >= " + t;
+
         this.t = t;
         this.m = m;
         this.a = a;
@@ -28,14 +40,30 @@ public class BigModulo extends PopulationProtocol<Pair<Integer, Pair<Integer[], 
         for (int i = 0; i < x.length; i++) {
             count += a[i] * x[i];
         }
-        return count % m >= 0;
+        return count % m >= t;
     }
 
     @Override
     public Set<Pair<Integer, Pair<Integer[], Boolean[]>>> getQ() {
         Set<Pair<Integer, Pair<Integer[], Boolean[]>>> Q = new HashSet<>();
         for (int i = 0; i <= 2 * m; i++) {
-
+            for (int j = 0; j < Math.pow(m, 2 * m); j++) {
+                Integer[] v = new Integer[2 * m];
+                Arrays.fill(v, 0);
+                int jMod = j;
+                for (int k = 0; k < 2 * m; k++) {
+                    v[k] = jMod % m;
+                    jMod /= m;
+                }
+                for (int k = 0; k < Math.pow(2, 2 * m); k++) {
+                    Boolean[] r = new Boolean[2 * m];
+                    Arrays.fill(r, false);
+                    for (int l = 0; l < 2 * m; l++) {
+                        r[l] = (k % 2) == 1;
+                    }
+                    Q.add(new Pair<>(i, new Pair<>(v, r)));
+                }
+            }
         }
         return Q;
     }
@@ -113,7 +141,9 @@ public class BigModulo extends PopulationProtocol<Pair<Integer, Pair<Integer[], 
         if (config.stream().allMatch(s1 -> {
             Population<Pair<Integer, Pair<Integer[], Boolean[]>>> config2 = new Population<>(this);
             for (int i = 0; i < config.size(); i++) {
-                config2.add(config.get(i));
+                if (config.isActive(i)) {
+                    config2.add(config.get(i));
+                }
             }
             config2.killState(s1);
             return config2.stream().allMatch(s2 -> this.delta(s1, s2).isEmpty());
