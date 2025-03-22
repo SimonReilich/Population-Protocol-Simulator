@@ -13,7 +13,10 @@ public class OrProtocol<T, U> extends PopulationProtocol<Pair<T, U>> {
     private final PopulationProtocol<U> p2;
 
     public OrProtocol(PopulationProtocol<T> protocol1, PopulationProtocol<U> protocol2) {
-        super(protocol1.ARG_LEN * protocol2.ARG_LEN, n -> "(" + protocol1.PREDICATE.apply(n) + ") & (" + protocol2.PREDICATE.apply(n + protocol1.ARG_LEN) + ")");
+        super(protocol1.ARG_LEN, n -> "(" + protocol1.PREDICATE.apply(n) + ") || (" + protocol2.PREDICATE.apply(n) + ")");
+        if (protocol1.ARG_LEN != protocol2.ARG_LEN) {
+            throw new IllegalArgumentException("The protocols must have the same argument length.");
+        }
         this.p1 = protocol1;
         this.p2 = protocol2;
     }
@@ -21,15 +24,7 @@ public class OrProtocol<T, U> extends PopulationProtocol<Pair<T, U>> {
     @Override
     public boolean predicate(int... x) {
         super.assertArgLength(x);
-        int[] x1 = new int[this.p1.ARG_LEN];
-        int[] x2 = new int[this.p2.ARG_LEN];
-        for (int i = 0; i < this.p1.ARG_LEN; i++) {
-            for (int j = 0; j < this.p2.ARG_LEN; j++) {
-                x1[i] += x[i * this.p1.ARG_LEN + j];
-                x2[j] += x[i * this.p1.ARG_LEN + j];
-            }
-        }
-        return this.p1.predicate(x1) && this.p2.predicate(x2);
+        return this.p1.predicate(x) || this.p2.predicate(x);
     }
 
     @Override
@@ -40,8 +35,13 @@ public class OrProtocol<T, U> extends PopulationProtocol<Pair<T, U>> {
 
     @Override
     public Set<Pair<T, U>> getI() {
-        // calculating the cross product of I1 and I2
-        return this.p1.getI().stream().flatMap(s -> this.p2.getI().stream().map(t -> new Pair<>(s, t))).collect(Collectors.toSet());
+        Set<Pair<T, U>> I = new HashSet<>();
+        for (int i = 0; i < this.ARG_LEN; i++) {
+            int[] x = new int[this.ARG_LEN];
+            x[i] = 1;
+            I.add(this.genConfig(x).get(0));
+        }
+        return I;
     }
 
     @Override
@@ -86,13 +86,12 @@ public class OrProtocol<T, U> extends PopulationProtocol<Pair<T, U>> {
 
     @Override
     public Population<Pair<T, U>> genConfig(int... x) {
+        assertArgLength(x);
+        Population<T> config1 = this.p1.genConfig(x);
+        Population<U> config2 = this.p2.genConfig(x);
         Population<Pair<T, U>> config = new Population<>(this);
-        for (int i = 0; i < this.p1.ARG_LEN; i++) {
-            for (int j = 0; j < this.p2.ARG_LEN; j++) {
-                for (int k = 0; k < x[i * this.p1.ARG_LEN + j]; k++) {
-                    config.add(new Pair<>(this.p1.genConfig(i).get(0), this.p2.genConfig(j).get(0)));
-                }
-            }
+        for (int i = 0; i < config1.size(); i++) {
+            config.add(new Pair<>(config1.get(i), config2.get(i)));
         }
         return config;
     }
