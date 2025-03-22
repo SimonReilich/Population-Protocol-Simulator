@@ -130,6 +130,11 @@ public class InhomTowerCancle extends WeakProtocol<EitherOr<Integer, Pair<Intege
     }
 
     @Override
+    public boolean statesEqual(EitherOr<Integer, Pair<Integer, Integer>> x, EitherOr<Integer, Pair<Integer, Integer>> y) {
+        return x.equals(y);
+    }
+
+    @Override
     public EitherOr<Integer, Pair<Integer, Integer>> stateFromString(String s) {
         try {
             return new EitherOr<>(Integer.parseInt(s), null);

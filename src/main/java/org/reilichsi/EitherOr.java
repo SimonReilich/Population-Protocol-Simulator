@@ -40,6 +40,15 @@ public class EitherOr<T, U> {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (o instanceof EitherOr<?, ?>) {
+            EitherOr<?, ?> other = (EitherOr<?, ?>) o;
+            return (other.isT() && this.isT() && other.getT().equals(this.getT())) || (other.isU() && this.isU() && other.getU().equals(this.getU()));
+        }
+        return false;
+    }
+
+    @Override
     public String toString() {
         if (this.isT()) {
             return this.getT().toString();

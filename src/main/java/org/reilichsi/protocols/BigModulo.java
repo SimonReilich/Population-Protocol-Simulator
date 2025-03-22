@@ -66,20 +66,27 @@ public class BigModulo extends PopulationProtocol<Pair<Integer, Pair<Integer[], 
         } else if (1 <= x.first() && y.first() <= 2 * m && x.first() < y.first()) {
             Integer[] v = Arrays.copyOfRange(x.second().first(), 0, 2 * m);
             Integer[] w = Arrays.copyOfRange(y.second().first(), 0, 2 * m);
-            int k1 = v[y.first() - 1];
+            int kv1 = v[y.first() - 1];
+            int kv2 = v[x.first() - 1];
+            int kw1 = w[x.first() - 1];
+            int kw2 = w[y.first() - 1];
             v[y.first() - 1] = 0;
             v[x.first() - 1] = (v[x.first() - 1] + w[x.first() - 1]) % m;
             w[x.first() - 1] = 0;
-            w[y.first() - 1] = (w[y.first() - 1] + k1) % m;
-            // steal
-            result.add(new Pair<>(new Pair<>(x.first(), new Pair<>(v, x.second().second())), new Pair<>(y.first(), new Pair<>(w, y.second().second()))));
+            w[y.first() - 1] = (w[y.first() - 1] + kv1) % m;
+            if (kv1 != v[y.first() - 1] || kv2 != v[x.first() - 1] || kw1 != w[x.first() - 1] || kw2 != w[y.first() - 1]) {
+                // steal
+                result.add(new Pair<>(new Pair<>(x.first(), new Pair<>(v, x.second().second())), new Pair<>(y.first(), new Pair<>(w, y.second().second()))));
+            }
         } else if (x.first() == y.first()) {
             Integer[] v = Arrays.copyOfRange(x.second().first(), 0, 2 * m);
             Integer[] w = Arrays.copyOfRange(y.second().first(), 0, 2 * m);
-            v[x.first() - 1] += w[x.first() - 1];
-            w[x.first() - 1] = 0;
-            // retire
-            result.add(new Pair<>(new Pair<>(x.first(), new Pair<>(v, x.second().second())), new Pair<>(0, new Pair<>(w, y.second().second()))));
+            if (w[x.first() - 1] != 0) {
+                v[x.first() - 1] = (v[x.first() - 1] + w[x.first() - 1]) % m;
+                w[x.first() - 1] = 0;
+                // retire
+                result.add(new Pair<>(new Pair<>(x.first(), new Pair<>(v, x.second().second())), new Pair<>(0, new Pair<>(w, y.second().second()))));
+            }
         }
 
         if (1 <= x.first() && x.first() <= 2 * m && 0 <= y.first() && y.first() <= 2 * m) {
@@ -87,8 +94,10 @@ public class BigModulo extends PopulationProtocol<Pair<Integer, Pair<Integer[], 
             Boolean[] s = Arrays.copyOfRange(y.second().second(), 0, 2 * m);
             r[x.first() - 1] = x.second().first()[x.first() - 1] >= this.t;
             s[x.first() - 1] = x.second().first()[x.first() - 1] >= this.t;
-            // result
-            result.add(new Pair<>(new Pair<>(x.first(), new Pair<>(x.second().first(), r)), new Pair<>(y.first(), new Pair<>(y.second().first(), s))));
+            if (r[x.first() - 1] != x.second().second()[x.first() - 1] || s[x.first() - 1] != y.second().second()[x.first() - 1]) {
+                // result
+                result.add(new Pair<>(new Pair<>(x.first(), new Pair<>(x.second().first(), r)), new Pair<>(y.first(), new Pair<>(y.second().first(), s))));
+            }
         }
 
         return result;
@@ -101,10 +110,17 @@ public class BigModulo extends PopulationProtocol<Pair<Integer, Pair<Integer[], 
 
     @Override
     public Optional<Boolean> consensus(Population<Pair<Integer, Pair<Integer[], Boolean[]>>> config) {
-        if (config.stream().anyMatch(s -> config.stream().anyMatch(p -> !this.delta(s, p).isEmpty()))) {
-            return Optional.empty();
-        } else {
+        if (config.stream().allMatch(s1 -> {
+            Population<Pair<Integer, Pair<Integer[], Boolean[]>>> config2 = new Population<>(this);
+            for (int i = 0; i < config.size(); i++) {
+                config2.add(config.get(i));
+            }
+            config2.killState(s1);
+            return config2.stream().allMatch(s2 -> this.delta(s1, s2).isEmpty());
+        })) {
             return Optional.of(this.output(config.get(0)));
+        } else {
+            return Optional.empty();
         }
     }
 
@@ -121,6 +137,11 @@ public class BigModulo extends PopulationProtocol<Pair<Integer, Pair<Integer[], 
             }
         }
         return config;
+    }
+
+    @Override
+    public boolean statesEqual(Pair<Integer, Pair<Integer[], Boolean[]>> x, Pair<Integer, Pair<Integer[], Boolean[]>> y) {
+        return x.first() == y.first() && Arrays.equals(x.second().first(), y.second().first()) && Arrays.equals(x.second().second(), y.second().second());
     }
 
     @Override

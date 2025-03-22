@@ -90,6 +90,11 @@ public class SignedNumbers extends PopulationProtocol<Pair<Boolean, Integer>> {
     }
 
     @Override
+    public boolean statesEqual(Pair<Boolean, Integer> x, Pair<Boolean, Integer> y) {
+        return x.equals(y);
+    }
+
+    @Override
     public Pair<Boolean, Integer> stateFromString(String s) {
         s = s.trim();
         return switch (s) {

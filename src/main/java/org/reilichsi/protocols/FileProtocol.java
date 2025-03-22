@@ -96,6 +96,11 @@ public class FileProtocol extends PopulationProtocol<String> {
     }
 
     @Override
+    public boolean statesEqual(String x, String y) {
+        return x.equals(y);
+    }
+
+    @Override
     public String stateFromString(String s) {
         return s;
     }

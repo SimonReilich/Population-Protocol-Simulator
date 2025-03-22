@@ -100,6 +100,11 @@ public class InhomTower extends PopulationProtocol<Pair<Integer, Integer>> {
         return config;
     }
 
+    @Override
+    public boolean statesEqual(Pair<Integer, Integer> x, Pair<Integer, Integer> y) {
+        return x.equals(y);
+    }
+
     public Pair<Integer, Integer> stateFromString(String s) {
         s = s.trim();
         for (int i = s.indexOf(';'); i < s.length(); i++) {

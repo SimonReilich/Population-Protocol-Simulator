@@ -102,6 +102,11 @@ public class GenMajority extends WeakProtocol<Integer> {
     }
 
     @Override
+    public boolean statesEqual(Integer x, Integer y) {
+        return x == y;
+    }
+
+    @Override
     public Integer stateFromString(String s) {
         int v = Integer.parseInt(s);
         if (getQ().contains(v)) {

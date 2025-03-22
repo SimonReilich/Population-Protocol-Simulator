@@ -53,6 +53,11 @@ public class NotProtocol<T> extends PopulationProtocol<T> {
     }
 
     @Override
+    public boolean statesEqual(T x, T y) {
+        return this.p.statesEqual(x, y);
+    }
+
+    @Override
     public T stateFromString(String s) {
         return this.p.stateFromString(s);
     }

@@ -5,7 +5,6 @@ import org.reilichsi.Pair;
 import org.reilichsi.Population;
 import org.reilichsi.predicates.BooleanCombination;
 import org.reilichsi.predicates.UnaryCondition;
-import org.reilichsi.predicates.UnaryThresholdPred;
 
 import java.util.*;
 
@@ -85,6 +84,11 @@ public class BoolCombThreshold extends PopulationProtocol<Pair<Integer, Integer>
             config.add(new Pair<>(1, 1));
         }
         return config;
+    }
+
+    @Override
+    public boolean statesEqual(Pair<Integer, Integer> x, Pair<Integer, Integer> y) {
+        return x.equals(y);
     }
 
     public Pair<Integer, Integer> stateFromString(String s) {

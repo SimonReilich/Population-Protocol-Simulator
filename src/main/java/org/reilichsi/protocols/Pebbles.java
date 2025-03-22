@@ -82,6 +82,11 @@ public class Pebbles extends PopulationProtocol<Integer> {
     }
 
     @Override
+    public boolean statesEqual(Integer x, Integer y) {
+        return x == y;
+    }
+
+    @Override
     public Integer stateFromString(String s) {
         int state = Integer.parseInt(s);
         if (state < 0 || state > this.t) {

@@ -76,6 +76,11 @@ public class WeakConvert<T> extends PopulationProtocol<Pair<T, Boolean>> {
     }
 
     @Override
+    public boolean statesEqual(Pair<T, Boolean> x, Pair<T, Boolean> y) {
+        return w.statesEqual(x.first(), y.first()) && x.second() == y.second();
+    }
+
+    @Override
     public Pair<T, Boolean> stateFromString(String s) {
         s = s.trim();
         for (int i = s.indexOf(';'); i < s.length(); i++) {

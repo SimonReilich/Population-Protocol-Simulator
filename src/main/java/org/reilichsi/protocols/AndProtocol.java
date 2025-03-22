@@ -98,6 +98,11 @@ public class AndProtocol<T, U> extends PopulationProtocol<Pair<T, U>> {
     }
 
     @Override
+    public boolean statesEqual(Pair<T, U> x, Pair<T, U> y) {
+        return p1.statesEqual(x.first(), y.first()) && p2.statesEqual(x.second(), y.second());
+    }
+
+    @Override
     public Pair<T, U> stateFromString(String s) {
         s = s.trim();
         for (int i = s.indexOf(';'); i < s.length(); i++) {
