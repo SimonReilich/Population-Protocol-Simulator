@@ -57,6 +57,11 @@ public class Main {
             ps = System.out;
         }
 
+        ps.println("\nInput: " + Arrays.toString(x));
+        if (!(protocol instanceof FileProtocol)) {
+            ps.println("Expected output: " + protocol.predicate(x));
+        }
+
         System.out.println("\nStarting simulation...\n");
         ps.println(config.toString());
 
