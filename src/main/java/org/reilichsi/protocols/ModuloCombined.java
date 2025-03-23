@@ -112,12 +112,28 @@ public class ModuloCombined extends PopulationProtocol<Pair<Integer, Pair<Pair<I
         Set<Pair<Pair<Integer, Pair<Integer[], Boolean[]>>, Pair<Integer, Pair<Integer[], Boolean[]>>>> moduloDelta = this.modulo.delta(x.second().first(), y.second().first());
         Set<Pair<Pair<Integer, Integer>, Pair<Integer, Integer>>> towerDelta = this.inhomTower.delta(x.second().second(), y.second().second());
         int h = Math.max(x.first(), y.first());
-        h = Math.max(h, x.second().second().second());
-        h = Math.max(h, y.second().second().second());
         Set<Pair<Pair<Integer, Pair<Pair<Integer, Pair<Integer[], Boolean[]>>, Pair<Integer, Integer>>>, Pair<Integer, Pair<Pair<Integer, Pair<Integer[], Boolean[]>>, Pair<Integer, Integer>>>>> res = new HashSet<>();
         for (Pair<Pair<Integer, Pair<Integer[], Boolean[]>>, Pair<Integer, Pair<Integer[], Boolean[]>>> moduloStates : moduloDelta) {
             for (Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> towerStates : towerDelta) {
-                res.add(new Pair<>(new Pair<>(h, new Pair<>(moduloStates.first(), towerStates.first())), new Pair<>(h, new Pair<>(moduloStates.second(), towerStates.second()))));
+                int hMod = Math.max(towerStates.first().second(), Math.max(towerStates.second().second(), h));
+                res.add(new Pair<>(new Pair<>(hMod, new Pair<>(moduloStates.first(), towerStates.first())), new Pair<>(hMod, new Pair<>(moduloStates.second(), towerStates.second()))));
+            }
+        }
+        if (moduloDelta.isEmpty()) {
+            if (towerDelta.isEmpty()) {
+                if (x.first() != h || y.first() != h) {
+                    res.add(new Pair<>(new Pair<>(h, x.second()), new Pair<>(h, y.second())));
+                }
+            } else {
+                for (Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> towerStates : towerDelta) {
+                    int hMod = Math.max(towerStates.first().second(), Math.max(towerStates.second().second(), h));
+                    res.add(new Pair<>(new Pair<>(hMod, new Pair<>(x.second().first(), towerStates.first())), new Pair<>(hMod, new Pair<>(x.second().first(), towerStates.second()))));
+                }
+            }
+        } else if (towerDelta.isEmpty()) {
+            int hMod = Math.max(x.second().second().second(), Math.max(y.second().second().second(), h));
+            for (Pair<Pair<Integer, Pair<Integer[], Boolean[]>>, Pair<Integer, Pair<Integer[], Boolean[]>>> moduloStates : moduloDelta) {
+                res.add(new Pair<>(new Pair<>(hMod, new Pair<>(moduloStates.first(), x.second().second())), new Pair<>(hMod, new Pair<>(moduloStates.second(), y.second().second()))));
             }
         }
         return res;

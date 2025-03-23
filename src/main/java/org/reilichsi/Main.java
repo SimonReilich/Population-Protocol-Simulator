@@ -73,7 +73,7 @@ public class Main {
 
         // Print the final configuration
         ps.println("\n" + config.toString());
-        ps.print("\nConsensus reached: " + protocol.consensus(config).get());
+        ps.print("\nConsensus reached: " + protocol.consensus(config).get() + ", expected " + protocol.predicate(x));
         if (ps != System.out) {
             ps.close();
             System.out.println("Done");
