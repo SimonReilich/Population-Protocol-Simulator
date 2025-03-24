@@ -42,7 +42,7 @@ public class Main {
         }
 
         System.out.println("\nInitializing sniper");
-        sniper = protocol.initializeSniper(r, inTol);
+        sniper = protocol.initializeSniper(r, Math.min(inTol, config.size() - 2));
 
         System.out.println("\nInitializing simulation");
         boolean fastSim;
