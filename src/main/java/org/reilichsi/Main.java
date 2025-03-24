@@ -35,7 +35,7 @@ public class Main {
 
         config = protocol.genConfig(x);
 
-        int inTol = config.size() - 1;
+        int inTol = config.size() - 2;
         if (!(protocol instanceof FileProtocol)) {
             inTol = calculateInTol(x);
             System.out.println("• Protocol with this input has the following initial tolerance: " + inTol);

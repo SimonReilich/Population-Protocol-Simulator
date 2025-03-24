@@ -140,15 +140,15 @@ public class Population<T> {
         for (int i = 0; i < population.size(); i++) {
             if (Arrays.asList(selected).contains(i)) {
                 if (active.get(i)) {
-                    sb.append(" *").append(protocol.stateToString(population.get(i))).append("* ").append("|");
+                    sb.append(" **").append(protocol.stateToString(population.get(i))).append("** ").append("|");
                 } else {
                     throw new IllegalStateException("Inactive agent cant be selected");
                 }
             } else {
                 if (active.get(i)) {
-                    sb.append("  ").append(protocol.stateToString(population.get(i))).append("  ").append("|");
+                    sb.append(" ").append(protocol.stateToString(population.get(i))).append(" ").append("|");
                 } else {
-                    sb.append(" -").append(protocol.stateToString(population.get(i))).append("- ").append("|");
+                    sb.append(" ~~").append(protocol.stateToString(population.get(i))).append("~~ ").append("|");
                 }
             }
         }
