@@ -37,12 +37,12 @@ public class Main {
 
         int inTol = config.size() - 1;
         if (!(protocol instanceof FileProtocol)) {
-            inTol = calculateInTol(x);
+            inTol = Math.min(calculateInTol(x), inTol);
             System.out.println("• Protocol with this input has the following initial tolerance: " + inTol);
         }
 
         System.out.println("\nInitializing sniper");
-        sniper = protocol.initializeSniper(r, Math.min(inTol, config.size() - 2));
+        sniper = protocol.initializeSniper(r, inTol);
 
         System.out.println("\nInitializing simulation");
         boolean fastSim;
