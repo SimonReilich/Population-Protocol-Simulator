@@ -30,7 +30,7 @@ public abstract class Sniper<T> {
 
     public void matchPopulationSize(Population<T> population) {
         if (population.size() <= this.maxSnipes || this.maxSnipes < 0) {
-            this.maxSnipes = population.size() - 1;
+            this.maxSnipes = population.size() - 2;
         }
     }
 }
