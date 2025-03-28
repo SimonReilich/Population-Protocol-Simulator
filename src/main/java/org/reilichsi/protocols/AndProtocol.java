@@ -90,7 +90,7 @@ public class AndProtocol<T, U> extends PopulationProtocol<Pair<T, U>> {
         Population<T> config1 = this.p1.genConfig(x);
         Population<U> config2 = this.p2.genConfig(x);
         Population<Pair<T, U>> config = new Population<>(this);
-        for (int i = 0; i < config1.size(); i++) {
+        for (int i = 0; i < config1.sizeAll(); i++) {
             config.add(new Pair<>(config1.get(i), config2.get(i)));
         }
         return config;

@@ -7,7 +7,7 @@ import java.io.PrintStream;
 
 public abstract class Sniper<T> {
 
-    private PopulationProtocol<T> protocol;
+    private final PopulationProtocol<T> protocol;
 
     private int maxSnipes;
 
@@ -29,8 +29,8 @@ public abstract class Sniper<T> {
     }
 
     public void matchPopulationSize(Population<T> population) {
-        if (population.size() <= this.maxSnipes || this.maxSnipes < 0) {
-            this.maxSnipes = population.size() - 2;
+        if (population.sizeAll() <= this.maxSnipes || this.maxSnipes < 0) {
+            this.maxSnipes = population.sizeAll() - 2;
         }
     }
 }

@@ -75,13 +75,12 @@ public class Simulator<T> {
             boolean value = protocol.predicate(x);
             for (int i = 1; i <= Arrays.stream(x).sum(); i++) {
                 if (Helper.getSub(x, i).stream().anyMatch(c -> protocol.predicate(c) != value)) {
+                    info.println("• Protocol with this input has the following initial tolerance: " + (i - 1));
                     return i - 1;
                 }
             }
-            info.println("• Protocol with this input has the following initial tolerance: " + Arrays.stream(x).sum());
-            return Arrays.stream(x).sum();
         }
-        return config.size() - 1;
+        return config.sizeAll() - 1;
     }
 
     private Pair<int[], Boolean> setup() throws IOException {
@@ -93,7 +92,7 @@ public class Simulator<T> {
         int inTol = calculateInTol(x);
 
         info.println("\nInitializing sniper");
-        sniper = protocol.initializeSniper(r, Math.min(inTol, config.size() - 2));
+        sniper = protocol.initializeSniper(r, Math.min(inTol, config.sizeAll() - 2));
 
         boolean fastSim = configureOutput(r);
         return new Pair<>(x, fastSim);
@@ -108,10 +107,10 @@ public class Simulator<T> {
         int agent1;
         int agent2;
         do {
-            agent1 = (int) (Math.random() * config.size());
+            agent1 = (int) (Math.random() * config.sizeAll());
         } while (!config.isActive(agent1));
         do {
-            agent2 = (int) (Math.random() * config.size());
+            agent2 = (int) (Math.random() * config.sizeAll());
         } while (agent1 == agent2 || !config.isActive(agent2));
         Pair<T, T> newState = pickRandomPair(protocol.delta(config.get(agent1), config.get(agent2)));
 

@@ -63,7 +63,7 @@ public class BoolCombThreshold extends PopulationProtocol<Pair<Integer, Integer>
 
     @Override
     public Optional<Boolean> consensus(Population<Pair<Integer, Integer>> config) {
-        if (config.stream().map(Pair::first).distinct().count() == config.sizeActive()) {
+        if (config.stream().map(Pair::first).distinct().count() == config.size()) {
             if (config.stream().map(Pair::second).distinct().count() == 1) {
                 Map<Integer, Integer> map = new HashMap<>();
                 map.put(1, config.stream().findFirst().get().second());

@@ -10,6 +10,7 @@ public class MultiSniper<T> extends Sniper<T> {
 
     private final Sniper<T>[] snipers;
 
+    @SafeVarargs
     public MultiSniper(PopulationProtocol<T> protocol, int maxSnipes, Sniper<T>... snipers) {
         super(protocol, maxSnipes);
         this.snipers = snipers;

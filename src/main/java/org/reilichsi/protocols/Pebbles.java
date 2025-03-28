@@ -62,9 +62,9 @@ public class Pebbles extends PopulationProtocol<Integer> {
 
     @Override
     public Optional<Boolean> consensus(Population<Integer> config) {
-        if (config.countActive(this.t) == config.sizeActive()) {
+        if (config.count(this.t) == config.size()) {
             return Optional.of(true);
-        } else if (config.contains(this.t) || config.countActive(0) < config.sizeActive() - 1) {
+        } else if (config.contains(this.t) || config.count(0) < config.size() - 1) {
             return Optional.empty();
         } else {
             return Optional.of(false);

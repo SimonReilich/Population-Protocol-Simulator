@@ -1,6 +1,5 @@
 package org.reilichsi;
 
-import org.reilichsi.protocols.PopulationProtocol;
 import org.reilichsi.protocols.Protocol;
 import org.reilichsi.protocols.WeakProtocol;
 
@@ -64,10 +63,6 @@ public class Population<T> {
     }
 
     public int count(T t) {
-        return (int) population.stream().filter(s -> s == t).count();
-    }
-
-    public int countActive(T t) {
         int count = 0;
         for (int i = 0; i < population.size(); i++) {
             if (population.get(i) == t && active.get(i)) {
@@ -77,11 +72,11 @@ public class Population<T> {
         return count;
     }
 
-    public int size() {
+    public int sizeAll() {
         return population.size();
     }
 
-    public int sizeActive() {
+    public int size() {
         return (int) active.stream().filter(b -> b).count();
     }
 
@@ -166,15 +161,15 @@ public class Population<T> {
 
     @Override
     public boolean equals(Object o) {
-        if (o.getClass().equals(this.getClass())) {
+        if (o instanceof Population<?>) {
             Population<T> other = (Population<T>) o;
             for (T s : this.population) {
-                if (other.countActive(s) != this.countActive(s)) {
+                if (other.count(s) != this.count(s)) {
                     return false;
                 }
             }
             for (T s : other.population) {
-                if (other.countActive(s) != this.countActive(s)) {
+                if (other.count(s) != this.count(s)) {
                     return false;
                 }
             }

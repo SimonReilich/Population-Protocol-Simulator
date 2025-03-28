@@ -55,8 +55,8 @@ public abstract class PopulationProtocol<T> implements Protocol<T> {
         } else {
             if (config.stream().allMatch(this::output)) {
                 visited.add(config);
-                for (int i = 0; i < config.size(); i++) {
-                    for (int j = i + 1; j < config.size(); j++) {
+                for (int i = 0; i < config.sizeAll(); i++) {
+                    for (int j = i + 1; j < config.sizeAll(); j++) {
                         Set<Pair<T, T>> delta = this.delta(config.get(i), config.get(j));
                         int finalI = i;
                         int finalJ = j;
@@ -83,14 +83,14 @@ public abstract class PopulationProtocol<T> implements Protocol<T> {
         } else {
             if (config.stream().noneMatch(this::output)) {
                 visited.add(config);
-                for (int i = 0; i < config.size(); i++) {
-                    for (int j = i + 1; j < config.size(); j++) {
+                for (int i = 0; i < config.sizeAll(); i++) {
+                    for (int j = i + 1; j < config.sizeAll(); j++) {
                         Set<Pair<T, T>> delta = this.delta(config.get(i), config.get(j));
                         int finalI = i;
                         int finalJ = j;
                         if (delta.stream().anyMatch(p -> {
                             Population<T> newConfig = new Population<>(this);
-                            for (int k = 0; k < config.size(); k++) {
+                            for (int k = 0; k < config.sizeAll(); k++) {
                                 newConfig.add(config.get(k));
                             }
                             newConfig.set(finalI, p.first());

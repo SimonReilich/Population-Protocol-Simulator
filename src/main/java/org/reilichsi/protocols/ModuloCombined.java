@@ -52,7 +52,7 @@ public class ModuloCombined extends PopulationProtocol<Pair<Integer, Pair<Pair<I
     public Optional<Boolean> consensus(Population<Pair<Integer, Pair<Pair<Integer, Pair<Integer[], Boolean[]>>, Pair<Integer, Integer>>>> config) {
         if (config.stream().allMatch(s1 -> {
             Population<Pair<Integer, Pair<Pair<Integer, Pair<Integer[], Boolean[]>>, Pair<Integer, Integer>>>> config2 = new Population<>(this);
-            for (int i = 0; i < config.size(); i++) {
+            for (int i = 0; i < config.sizeAll(); i++) {
                 if (config.isActive(i)) {
                     config2.add(config.get(i));
                 }

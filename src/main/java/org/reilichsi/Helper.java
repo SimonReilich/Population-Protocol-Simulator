@@ -16,16 +16,6 @@ public class Helper {
         return count;
     }
 
-    public static boolean arePairsJoint(Pair<Integer, Integer> p1, Pair<Integer, Integer> p2) {
-        if (p1.first() < p2.first()) {
-            return p1.second() > p2.first();
-        } else if (p2.first() < p1.first()) {
-            return p2.second() > p1.first();
-        } else {
-            return true;
-        }
-    }
-
     public static Set<int[]> getSub(int[] x, int n) {
         if (Arrays.stream(x).allMatch(a -> a == 0)) {
             return Set.of(x);

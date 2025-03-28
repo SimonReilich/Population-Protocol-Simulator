@@ -140,7 +140,7 @@ public class BigModulo extends PopulationProtocol<Pair<Integer, Pair<Integer[], 
     public Optional<Boolean> consensus(Population<Pair<Integer, Pair<Integer[], Boolean[]>>> config) {
         if (config.stream().allMatch(s1 -> {
             Population<Pair<Integer, Pair<Integer[], Boolean[]>>> config2 = new Population<>(this);
-            for (int i = 0; i < config.size(); i++) {
+            for (int i = 0; i < config.sizeAll(); i++) {
                 if (config.isActive(i)) {
                     config2.add(config.get(i));
                 }

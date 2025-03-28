@@ -37,7 +37,7 @@ public class RandomSniper<T> extends Sniper<T> {
             for (int i = 0; i < toBeSniped; i++) {
                 int index;
                 do {
-                    index = (int) (Math.random() * config.size());
+                    index = (int) (Math.random() * config.sizeAll());
                 } while (!config.isActive(index));
                 config.kill(index);
                 out = true;

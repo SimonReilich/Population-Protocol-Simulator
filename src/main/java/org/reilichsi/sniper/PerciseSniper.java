@@ -3,14 +3,13 @@ package org.reilichsi.sniper;
 import org.reilichsi.Population;
 import org.reilichsi.protocols.PopulationProtocol;
 
-import java.io.IOException;
 import java.io.PrintStream;
 
 public class PerciseSniper<T> extends Sniper<T> {
 
     private final T target;
 
-    public PerciseSniper(PopulationProtocol<T> protocol, int maxSnipes, T target) throws IOException {
+    public PerciseSniper(PopulationProtocol<T> protocol, int maxSnipes, T target) {
         super(protocol, maxSnipes);
         this.target = target;
     }

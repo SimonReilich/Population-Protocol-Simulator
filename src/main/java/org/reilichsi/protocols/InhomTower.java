@@ -64,7 +64,7 @@ public class InhomTower extends PopulationProtocol<Pair<Integer, Integer>> {
 
     @Override
     public Set<Pair<Pair<Integer, Integer>, Pair<Integer, Integer>>> delta(Pair<Integer, Integer> x, Pair<Integer, Integer> y) {
-        if (Helper.arePairsJoint(x, y) && x.first() <= y.first() && x.second() <= this.t && y.second() <= this.t) {
+        if (Pair.arePairsJoint(x, y) && x.first() <= y.first() && x.second() <= this.t && y.second() <= this.t) {
             // step
             return Set.of(new Pair<>(x, new Pair<>(y.first() + 1, y.second() + 1)));
         } else if (x.second() == this.t + 1 && y.second() <= this.t) {
@@ -82,9 +82,9 @@ public class InhomTower extends PopulationProtocol<Pair<Integer, Integer>> {
     @Override
     public Optional<Boolean> consensus(Population<Pair<Integer, Integer>> config) {
         if (config.stream().anyMatch(this::output)) {
-            return config.stream().filter(this::output).count() < config.sizeActive() ? Optional.empty() : Optional.of(true);
+            return config.stream().filter(this::output).count() < config.size() ? Optional.empty() : Optional.of(true);
         } else {
-            return config.stream().anyMatch(s -> config.stream().filter(s2 -> Helper.arePairsJoint(s, s2)).count() > 1) ? Optional.empty() : Optional.of(false);
+            return config.stream().anyMatch(s -> config.stream().filter(s2 -> Pair.arePairsJoint(s, s2)).count() > 1) ? Optional.empty() : Optional.of(false);
         }
     }
 

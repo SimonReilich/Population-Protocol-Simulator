@@ -11,7 +11,7 @@ public class NoSniper<T> extends Sniper<T> {
     }
 
     @Override
-    public boolean snipe(Population<T> config, boolean fastSim, PrintStream ps) throws InterruptedException {
+    public boolean snipe(Population<T> config, boolean fastSim, PrintStream ps) {
         return false;
     }
 }
