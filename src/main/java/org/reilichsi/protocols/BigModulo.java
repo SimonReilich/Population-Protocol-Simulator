@@ -122,7 +122,7 @@ public class BigModulo extends PopulationProtocol<Pair<Integer, Pair<Integer[], 
             Boolean[] s = Arrays.copyOfRange(y.second().second(), 0, 2 * m);
             r[x.first() - 1] = x.second().first()[x.first() - 1] >= this.t;
             s[x.first() - 1] = x.second().first()[x.first() - 1] >= this.t;
-            if (r[x.first() - 1] != x.second().second()[x.first() - 1] || s[x.first() - 1] != y.second().second()[x.first() - 1]) {
+            if (! Arrays.equals(r, x.second().second()) || ! Arrays.equals(s, y.second().second())) {
                 // result
                 result.add(new Pair<>(new Pair<>(x.first(), new Pair<>(x.second().first(), r)), new Pair<>(y.first(), new Pair<>(y.second().first(), s))));
             }

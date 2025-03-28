@@ -6,20 +6,6 @@ import java.util.Set;
 
 public class Helper {
 
-    public static Pair<String, String> pickRandomPair(Set<Pair<String, String>> set) {
-        // randomly pick a pair from the set
-        int index = (int) (Math.random() * set.size());
-        int i = 0;
-        // iterating over the elements of the set until the index is reached
-        for (Pair<String, String> p : set) {
-            if (i == index) {
-                return p;
-            }
-            i++;
-        }
-        return null;
-    }
-
     public static int countChar(String s, char c) {
         int count = 0;
         for (int i = 0; i < s.length(); i++) {

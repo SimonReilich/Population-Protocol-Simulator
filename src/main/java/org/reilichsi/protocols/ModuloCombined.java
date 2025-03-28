@@ -36,7 +36,7 @@ public class ModuloCombined extends PopulationProtocol<Pair<Integer, Pair<Pair<I
         this.a = a;
 
         this.modulo = new BigModulo(this.t, this.m, this.a);
-        this.inhomTower = new InhomTower(this.t, this.a);
+        this.inhomTower = new InhomTower((int) (3 * Math.pow(this.m, 2)), this.a);
     }
 
     @Override
