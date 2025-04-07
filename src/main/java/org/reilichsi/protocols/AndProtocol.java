@@ -4,7 +4,10 @@ import org.reilichsi.Helper;
 import org.reilichsi.Pair;
 import org.reilichsi.Population;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class AndProtocol<T, U> extends PopulationProtocol<Pair<T, U>> {
@@ -13,7 +16,7 @@ public class AndProtocol<T, U> extends PopulationProtocol<Pair<T, U>> {
     private final PopulationProtocol<U> p2;
 
     public AndProtocol(PopulationProtocol<T> protocol1, PopulationProtocol<U> protocol2) {
-        super(protocol1.ARG_LEN, n -> "(" + protocol1.PREDICATE.apply(n) + ") && (" + protocol2.PREDICATE.apply(n) + ")");
+        super(protocol1.ARG_LEN, "(" + protocol1.PREDICATE + ") && (" + protocol2.PREDICATE + ")");
         if (protocol1.ARG_LEN != protocol2.ARG_LEN) {
             throw new IllegalArgumentException("The protocols must have the same argument length.");
         }
@@ -102,13 +105,13 @@ public class AndProtocol<T, U> extends PopulationProtocol<Pair<T, U>> {
     }
 
     @Override
-    public Pair<T, U> stateFromString(String s) {
+    public Pair<T, U> parseString(String s) {
         s = s.trim();
         for (int i = s.indexOf(';'); i < s.length(); i++) {
             String first = s.substring(1, i).trim();
             String second = s.substring(i + 2, s.length() - 1).trim();
             if (Helper.countChar(first, '(') - Helper.countChar(first, ')') == 0 && Helper.countChar(second, '(') - Helper.countChar(second, ')') == 0) {
-                return new Pair<>(this.p1.stateFromString(first), this.p2.stateFromString(second));
+                return new Pair<>(this.p1.parseString(first), this.p2.parseString(second));
             }
         }
         throw new IllegalArgumentException("Invalid state: " + s);

@@ -3,6 +3,7 @@ package org.reilichsi.protocols;
 import org.reilichsi.Helper;
 import org.reilichsi.Pair;
 import org.reilichsi.Population;
+import org.reilichsi.protocols.states.WeakStateConv;
 
 import java.util.HashSet;
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class WeakConvert<T> extends PopulationProtocol<Pair<T, Boolean>> {
+public class WeakConvert<T> extends PopulationProtocol<WeakStateConv<T>> {
 
     private final WeakProtocol<T> w;
 
@@ -26,41 +27,45 @@ public class WeakConvert<T> extends PopulationProtocol<Pair<T, Boolean>> {
     }
 
     @Override
-    public Set<Pair<T, Boolean>> getQ() {
-        return this.w.getQ().stream().flatMap(s -> Set.of(new Pair<>(s, true), new Pair<>(s, false)).stream()).collect(Collectors.toSet());
+    public Set<WeakStateConv<T>> getQ() {
+        HashSet<WeakStateConv<T>> Q = new HashSet<>();
+        Q.addAll(w.getQ().stream().filter(s -> w.output(s).isPresent()).map(s -> new WeakStateConv<>(s, w)).toList());
+        Q.addAll(w.getQ().stream().filter(s -> w.output(s).isEmpty()).map(s -> new WeakStateConv<>(s, w, false)).toList());
+        Q.addAll(w.getQ().stream().filter(s -> w.output(s).isEmpty()).map(s -> new WeakStateConv<>(s, w, true)).toList());
+        return Q;
     }
 
     @Override
-    public Set<Pair<T, Boolean>> getI() {
-        return this.w.getI().stream().map(s -> this.w.output(s).isPresent() ? new Pair<>(s, this.w.output(s).get()) : new Pair<>(s, false)).collect(Collectors.toSet());
+    public Set<WeakStateConv<T>> getI() {
+        return this.w.getI().stream().map(s -> new WeakStateConv<>(s, w)).collect(Collectors.toSet());
     }
 
     @Override
-    public Set<Pair<Pair<T, Boolean>, Pair<T, Boolean>>> delta(Pair<T, Boolean> x, Pair<T, Boolean> y) {
-        HashSet<Pair<Pair<T, Boolean>, Pair<T, Boolean>>> result = new HashSet<>();
-        if (this.w.output(x.first()).isPresent() && this.w.output(y.first()).isEmpty()) {
+    public Set<Pair<WeakStateConv<T>, WeakStateConv<T>>> delta(WeakStateConv<T> x, WeakStateConv<T> y) {
+        HashSet<Pair<WeakStateConv<T>, WeakStateConv<T>>> result = new HashSet<>();
+        if (!x.isNeutral() && y.isNeutral()) {
             // witnessPos / witnessNeg
-            result.add(new Pair<>(new Pair<>(x.first(), this.w.output(x.first()).get()), new Pair<>(y.first(), this.w.output(x.first()).get())));
-        } else if (this.w.output(y.first()).isPresent() && this.w.output(x.first()).isEmpty()) {
+            result.add(new Pair<>(x, new WeakStateConv<>(y.getState(), w, x.getTendency())));
+        } else if (!y.isNeutral() && x.isNeutral()) {
             // witnessPos / witnessNeg
-            result.add(new Pair<>(new Pair<>(x.first(), this.w.output(y.first()).get()), new Pair<>(y.first(), this.w.output(y.first()).get())));
-        } else if (this.w.output(x.first()).isEmpty() && this.w.output(y.first()).isEmpty() && x.second() != y.second()) {
+            result.add(new Pair<>(new WeakStateConv<>(x.getState(), w, y.getTendency()), y));
+        } else if (x.isNeutral() && y.isNeutral() && x.getTendency() != y.getTendency()) {
             // convince
-            result.add(new Pair<>(new Pair<>(x.first(), false), new Pair<>(y.first(), false)));
+            result.add(new Pair<>(new WeakStateConv<>(x.getState(), w, false), new WeakStateConv<>(y.getState(), w, false)));
         }
         // derived
-        result.addAll(this.w.delta(x.first(), y.first()).stream().map(s -> new Pair<>(new Pair<>(s.first(), (this.w.output(s.first()).isPresent() && this.w.output(s.first()).get())), new Pair<>(s.second(), (this.w.output(s.second()).isPresent() && this.w.output(s.second()).get())))).collect(Collectors.toSet()));
+        result.addAll(this.w.delta(x.getState(), y.getState()).stream().map(s -> new Pair<>(new WeakStateConv<>(s.first(), w, false), new WeakStateConv<>(s.second(), w, false))).collect(Collectors.toSet()));
         return result;
     }
 
     @Override
-    public boolean output(Pair<T, Boolean> state) {
-        return this.w.output(state.first()).isPresent() ? (boolean) this.w.output(state.first()).get() : state.second();
+    public boolean output(WeakStateConv<T> state) {
+        return state.getTendency();
     }
 
     @Override
-    public Optional<Boolean> consensus(Population<Pair<T, Boolean>> config) {
-        List<T> list = config.stream().map(Pair::first).toList();
+    public Optional<Boolean> consensus(Population<WeakStateConv<T>> config) {
+        List<T> list = config.stream().map(WeakStateConv::getState).toList();
         Population<T> weakPop = new Population<>(this.w);
         for (T s : list) {
             weakPop.add(s);
@@ -69,25 +74,25 @@ public class WeakConvert<T> extends PopulationProtocol<Pair<T, Boolean>> {
     }
 
     @Override
-    public Population<Pair<T, Boolean>> genConfig(int... x) {
+    public Population<WeakStateConv<T>> genConfig(int... x) {
         assertArgLength(x);
-        List<Pair<T, Boolean>> weakPopulation = this.w.genConfig(x).stream().map(s -> this.w.output(s).isPresent() ? new Pair<>(s, this.w.output(s).get()) : new Pair<>(s, false)).toList();
-        return new Population<Pair<T, Boolean>>(this, weakPopulation.toArray(new Pair[0]));
+        List<WeakStateConv<T>> weakPopulation = this.w.genConfig(x).stream().map(s -> new WeakStateConv<>(s, w)).toList();
+        return new Population<WeakStateConv<T>>(this, weakPopulation.toArray(new WeakStateConv[0]));
     }
 
     @Override
-    public boolean statesEqual(Pair<T, Boolean> x, Pair<T, Boolean> y) {
-        return w.statesEqual(x.first(), y.first()) && x.second() == y.second();
+    public boolean statesEqual(WeakStateConv x, WeakStateConv y) {
+        return x.getState().equals(y.getState()) && x.getTendency() == y.getTendency();
     }
 
     @Override
-    public Pair<T, Boolean> stateFromString(String s) {
+    public WeakStateConv<T> parseString(String s) {
         s = s.trim();
         for (int i = s.indexOf(';'); i < s.length(); i++) {
             String first = s.substring(1, i).trim();
             String second = s.substring(i + 2, s.length() - 1).trim();
             if (Helper.countChar(first, '(') - Helper.countChar(first, ')') == 0 && Helper.countChar(second, '(') - Helper.countChar(second, ')') == 0) {
-                return new Pair<>(this.w.stateFromString(first), Boolean.parseBoolean(second));
+                return new WeakStateConv<>(this.w.parseString(first), w, Boolean.parseBoolean(second));
             }
         }
         throw new IllegalArgumentException("Invalid state: " + s);

@@ -2,31 +2,28 @@ package org.reilichsi.protocols;
 
 import org.reilichsi.Pair;
 import org.reilichsi.Population;
+import org.reilichsi.protocols.states.BigModState;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 
-public class BigModulo extends PopulationProtocol<Pair<Integer, Pair<Integer[], Boolean[]>>> {
+public class BigModulo extends PopulationProtocol<BigModState> {
 
-    private final int t;
-    private final int m;
+    public final int t;
+    public final int m;
     private final int[] a;
 
     public BigModulo(int t, int m, int... a) {
-        super(a.length , n -> "");
+        super(a.length, "");
 
         // generating String-representation for predicate
-        Function<Integer, String> p = n -> "(" + a[0] + " * x_" + n + ")";
+        StringBuilder p = new StringBuilder("(" + a[0] + " * x_" + 0 + ")");
         for (int i = 1; i < a.length; i++) {
-            Function<Integer, String> finalP = p;
-            int finalI = i;
-            p = n -> finalP.apply(n) + " + (" + a[finalI] + " * x_" + (n + finalI) + ")";
+            p.append(" + (").append(a[i]).append(" * x_").append(i).append(")");
         }
-        Function<Integer, String> finalP = p;
-        super.PREDICATE = n -> finalP.apply(n) + " mod " + m + " >= " + t;
+        super.PREDICATE = p + " mod " + m + " >= " + t;
 
         this.t = t;
         this.m = m;
@@ -44,11 +41,11 @@ public class BigModulo extends PopulationProtocol<Pair<Integer, Pair<Integer[], 
     }
 
     @Override
-    public Set<Pair<Integer, Pair<Integer[], Boolean[]>>> getQ() {
-        Set<Pair<Integer, Pair<Integer[], Boolean[]>>> Q = new HashSet<>();
+    public Set<BigModState> getQ() {
+        Set<BigModState> Q = new HashSet<>();
         for (int i = 0; i <= 2 * m; i++) {
             for (int j = 0; j < Math.pow(m, 2 * m); j++) {
-                Integer[] v = new Integer[2 * m];
+                int[] v = new int[2 * m];
                 Arrays.fill(v, 0);
                 int jMod = j;
                 for (int k = 0; k < 2 * m; k++) {
@@ -56,12 +53,12 @@ public class BigModulo extends PopulationProtocol<Pair<Integer, Pair<Integer[], 
                     jMod /= m;
                 }
                 for (int k = 0; k < Math.pow(2, 2 * m); k++) {
-                    Boolean[] r = new Boolean[2 * m];
+                    boolean[] r = new boolean[2 * m];
                     Arrays.fill(r, false);
                     for (int l = 0; l < 2 * m; l++) {
                         r[l] = (k % 2) == 1;
                     }
-                    Q.add(new Pair<>(i, new Pair<>(v, r)));
+                    Q.add(new BigModState(this, i, v, r));
                 }
             }
         }
@@ -69,62 +66,62 @@ public class BigModulo extends PopulationProtocol<Pair<Integer, Pair<Integer[], 
     }
 
     @Override
-    public Set<Pair<Integer, Pair<Integer[], Boolean[]>>> getI() {
-        Set<Pair<Integer, Pair<Integer[], Boolean[]>>> I = new HashSet<>();
+    public Set<BigModState> getI() {
+        Set<BigModState> I = new HashSet<>();
         for (int ai : a) {
-            Integer[] v = new Integer[2 * m];
+            int[] v = new int[2 * m];
             Arrays.fill(v, ai);
-            Boolean[] r = new Boolean[2 * m];
+            boolean[] r = new boolean[2 * m];
             Arrays.fill(r, false);
-            I.add(new Pair<>(0, new Pair<>(v, r)));
+            I.add(new BigModState(this, 0, v, r));
         }
         return I;
     }
 
     @Override
-    public Set<Pair<Pair<Integer, Pair<Integer[], Boolean[]>>, Pair<Integer, Pair<Integer[], Boolean[]>>>> delta(Pair<Integer, Pair<Integer[], Boolean[]>> x, Pair<Integer, Pair<Integer[], Boolean[]>> y) {
-        Set<Pair<Pair<Integer, Pair<Integer[], Boolean[]>>, Pair<Integer, Pair<Integer[], Boolean[]>>>> result = new HashSet<>();
-        if (x.first() == 0) {
+    public Set<Pair<BigModState, BigModState>> delta(BigModState x, BigModState y) {
+        Set<Pair<BigModState, BigModState>> result = new HashSet<>();
+        if (x.level == 0) {
             for (int i = 1; i <= 2 * m; i++) {
-                if (x.second().first()[i - 1] >= 1) {
+                if (x.tokens[i - 1] >= 1) {
                     // distrib
-                    result.add(new Pair<>(new Pair<>(i, x.second()), y));
+                    result.add(new Pair<>(new BigModState(this, i, x.tokens, x.result), y));
                 }
             }
-        } else if (1 <= x.first() && y.first() <= 2 * m && x.first() < y.first()) {
-            Integer[] v = Arrays.copyOfRange(x.second().first(), 0, 2 * m);
-            Integer[] w = Arrays.copyOfRange(y.second().first(), 0, 2 * m);
-            int kv1 = v[y.first() - 1];
-            int kv2 = v[x.first() - 1];
-            int kw1 = w[x.first() - 1];
-            int kw2 = w[y.first() - 1];
-            v[y.first() - 1] = 0;
-            v[x.first() - 1] = (v[x.first() - 1] + w[x.first() - 1]) % m;
-            w[x.first() - 1] = 0;
-            w[y.first() - 1] = (w[y.first() - 1] + kv1) % m;
-            if (kv1 != v[y.first() - 1] || kv2 != v[x.first() - 1] || kw1 != w[x.first() - 1] || kw2 != w[y.first() - 1]) {
+        } else if (1 <= x.level && y.level <= 2 * m && x.level < y.level) {
+            int[] v = Arrays.copyOfRange(x.tokens, 0, 2 * m);
+            int[] w = Arrays.copyOfRange(y.tokens, 0, 2 * m);
+            int kv1 = v[y.level - 1];
+            int kv2 = v[x.level - 1];
+            int kw1 = w[x.level - 1];
+            int kw2 = w[y.level - 1];
+            v[y.level - 1] = 0;
+            v[x.level - 1] = (v[x.level - 1] + w[x.level - 1]) % m;
+            w[x.level - 1] = 0;
+            w[y.level - 1] = (w[y.level - 1] + kv1) % m;
+            if (kv1 != v[y.level - 1] || kv2 != v[x.level - 1] || kw1 != w[x.level - 1] || kw2 != w[y.level - 1]) {
                 // steal
-                result.add(new Pair<>(new Pair<>(x.first(), new Pair<>(v, x.second().second())), new Pair<>(y.first(), new Pair<>(w, y.second().second()))));
+                result.add(new Pair<>(new BigModState(this, x.level, v, x.result), new BigModState(this, y.level, w, y.result)));
             }
-        } else if (x.first() == y.first()) {
-            Integer[] v = Arrays.copyOfRange(x.second().first(), 0, 2 * m);
-            Integer[] w = Arrays.copyOfRange(y.second().first(), 0, 2 * m);
-            if (w[x.first() - 1] != 0) {
-                v[x.first() - 1] = (v[x.first() - 1] + w[x.first() - 1]) % m;
-                w[x.first() - 1] = 0;
+        } else if (x.level == y.level) {
+            int[] v = Arrays.copyOfRange(x.tokens, 0, 2 * m);
+            int[] w = Arrays.copyOfRange(y.tokens, 0, 2 * m);
+            if (w[x.level - 1] != 0) {
+                v[x.level - 1] = (v[x.level - 1] + w[x.level - 1]) % m;
+                w[x.level - 1] = 0;
                 // retire
-                result.add(new Pair<>(new Pair<>(x.first(), new Pair<>(v, x.second().second())), new Pair<>(0, new Pair<>(w, y.second().second()))));
+                result.add(new Pair<>(new BigModState(this, x.level, v, x.result), new BigModState(this, 0, w, y.result)));
             }
         }
 
-        if (1 <= x.first() && x.first() <= 2 * m && 0 <= y.first() && y.first() <= 2 * m) {
-            Boolean[] r = Arrays.copyOfRange(x.second().second(), 0, 2 * m);
-            Boolean[] s = Arrays.copyOfRange(y.second().second(), 0, 2 * m);
-            r[x.first() - 1] = x.second().first()[x.first() - 1] >= this.t;
-            s[x.first() - 1] = x.second().first()[x.first() - 1] >= this.t;
-            if (! Arrays.equals(r, x.second().second()) || ! Arrays.equals(s, y.second().second())) {
+        if (1 <= x.level && x.level <= 2 * m && 0 <= y.level && y.level <= 2 * m) {
+            boolean[] r = Arrays.copyOfRange(x.result, 0, 2 * m);
+            boolean[] s = Arrays.copyOfRange(y.result, 0, 2 * m);
+            r[x.level - 1] = x.tokens[x.level - 1] >= this.t;
+            s[x.level - 1] = x.tokens[x.level - 1] >= this.t;
+            if (!Arrays.equals(r, x.result) || !Arrays.equals(s, y.result)) {
                 // result
-                result.add(new Pair<>(new Pair<>(x.first(), new Pair<>(x.second().first(), r)), new Pair<>(y.first(), new Pair<>(y.second().first(), s))));
+                result.add(new Pair<>(new BigModState(this, x.level, x.tokens, r), new BigModState(this, y.level, y.tokens, s)));
             }
         }
 
@@ -132,14 +129,18 @@ public class BigModulo extends PopulationProtocol<Pair<Integer, Pair<Integer[], 
     }
 
     @Override
-    public boolean output(Pair<Integer, Pair<Integer[], Boolean[]>> state) {
-        return Arrays.stream(state.second().second()).filter(s -> s).count() > this.m;
+    public boolean output(BigModState state) {
+        int x = 0;
+        for (boolean r : state.result) {
+            x = r ? 1 : 0;
+        }
+        return x > state.result.length / 2;
     }
 
     @Override
-    public Optional<Boolean> consensus(Population<Pair<Integer, Pair<Integer[], Boolean[]>>> config) {
+    public Optional<Boolean> consensus(Population<BigModState> config) {
         if (config.stream().allMatch(s1 -> {
-            Population<Pair<Integer, Pair<Integer[], Boolean[]>>> config2 = new Population<>(this);
+            Population<BigModState> config2 = new Population<>(this);
             for (int i = 0; i < config.sizeAll(); i++) {
                 if (config.isActive(i)) {
                     config2.add(config.get(i));
@@ -155,34 +156,34 @@ public class BigModulo extends PopulationProtocol<Pair<Integer, Pair<Integer[], 
     }
 
     @Override
-    public Population<Pair<Integer, Pair<Integer[], Boolean[]>>> genConfig(int... x) {
-        Population<Pair<Integer, Pair<Integer[], Boolean[]>>> config = new Population<>(this);
+    public Population<BigModState> genConfig(int... x) {
+        Population<BigModState> config = new Population<>(this);
         for (int i = 0; i < x.length; i++) {
-            Integer[] v = new Integer[2 * m];
+            int[] v = new int[2 * m];
             Arrays.fill(v, a[i]);
-            Boolean[] r = new Boolean[2 * m];
+            boolean[] r = new boolean[2 * m];
             Arrays.fill(r, false);
             for (int j = 0; j < x[i]; j++) {
-                config.add(new Pair<>(0, new Pair<>(v, r)));
+                config.add(new BigModState(this, 0, v, r));
             }
         }
         return config;
     }
 
     @Override
-    public boolean statesEqual(Pair<Integer, Pair<Integer[], Boolean[]>> x, Pair<Integer, Pair<Integer[], Boolean[]>> y) {
-        return x.first() == y.first() && Arrays.equals(x.second().first(), y.second().first()) && Arrays.equals(x.second().second(), y.second().second());
+    public boolean statesEqual(BigModState x, BigModState y) {
+        return x.equals(y);
     }
 
     @Override
-    public String stateToString(Pair<Integer, Pair<Integer[], Boolean[]>> state) {
+    public String stateToString(BigModState state) {
         StringBuilder sb = new StringBuilder();
-        sb.append("(").append(state.first()).append(", (").append(state.second().first()[0]);
-        for (int i = 1; i < state.second().first().length; i++) {
-            sb.append(", ").append(state.second().first()[i]);
+        sb.append("(").append(state.level).append(", (").append(state.tokens[0]);
+        for (int i = 1; i < state.tokens.length; i++) {
+            sb.append(", ").append(state.tokens[i]);
         }
         sb.append("), ");
-        for (boolean r : state.second().second()) {
+        for (boolean r : state.result) {
             sb.append(r ? "+" : "-");
         }
         sb.append(")");
@@ -190,7 +191,7 @@ public class BigModulo extends PopulationProtocol<Pair<Integer, Pair<Integer[], 
     }
 
     @Override
-    public Pair<Integer, Pair<Integer[], Boolean[]>> stateFromString(String s) {
+    public BigModState parseString(String s) {
         return null;
     }
 }

@@ -4,6 +4,7 @@ import org.reilichsi.Pair;
 import org.reilichsi.Population;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -12,7 +13,7 @@ public class Pebbles extends PopulationProtocol<Integer> {
     private final int t;
 
     public Pebbles(int t) {
-        super(1, n -> "x_" + n + " >= " + t);
+        super(1, "x_0 >= " + t);
         this.t = t;
     }
 
@@ -83,11 +84,11 @@ public class Pebbles extends PopulationProtocol<Integer> {
 
     @Override
     public boolean statesEqual(Integer x, Integer y) {
-        return x == y;
+        return Objects.equals(x, y);
     }
 
     @Override
-    public Integer stateFromString(String s) {
+    public Integer parseString(String s) {
         int state = Integer.parseInt(s);
         if (state < 0 || state > this.t) {
             throw new IllegalArgumentException("Invalid state: " + s + ". Must be between 0 and " + this.t);

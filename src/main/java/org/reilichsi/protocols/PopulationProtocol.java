@@ -9,15 +9,14 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 
 public abstract class PopulationProtocol<T> implements Protocol<T> {
 
     public final int ARG_LEN;
-    public Function<Integer, String> PREDICATE;
+    public String PREDICATE;
     private Set<Population<T>> visited;
 
-    public PopulationProtocol(int ARG_LEN, Function<Integer, String> PREDICATE) {
+    public PopulationProtocol(int ARG_LEN, String PREDICATE) {
         this.ARG_LEN = ARG_LEN;
         this.PREDICATE = PREDICATE;
     }
@@ -139,7 +138,7 @@ public abstract class PopulationProtocol<T> implements Protocol<T> {
             System.out.print("  - Maximum amount of Snipes: ");
             int maxSnipes = Integer.parseInt(r.readLine());
             System.out.print("  - Target: ");
-            T target = this.stateFromString(r.readLine());
+            T target = this.parseString(r.readLine());
             return new PerciseSniper<>(this, maxSnipes, target);
         } else if (sniperCode.equalsIgnoreCase("m")) {
             System.out.print("  - Maximum amount of Snipes: ");
@@ -175,7 +174,7 @@ public abstract class PopulationProtocol<T> implements Protocol<T> {
             return new RandomSniper<>(this, max, snipeRate);
         } else if (sniperCode.equalsIgnoreCase("p")) {
             System.out.print("  - Target: ");
-            T target = this.stateFromString(r.readLine());
+            T target = this.parseString(r.readLine());
             return new PerciseSniper<>(this, max, target);
         } else if (sniperCode.equalsIgnoreCase("m")) {
             System.out.print("  - Number of Snipers: ");

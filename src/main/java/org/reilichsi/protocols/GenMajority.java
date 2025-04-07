@@ -3,11 +3,7 @@ package org.reilichsi.protocols;
 import org.reilichsi.Pair;
 import org.reilichsi.Population;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
+import java.util.*;
 
 public class GenMajority extends WeakProtocol<Integer> {
 
@@ -15,19 +11,24 @@ public class GenMajority extends WeakProtocol<Integer> {
 
     public GenMajority(int... a) {
 
-        super(a.length, n -> "");
+        super(a.length, "");
 
         // generating String-representation for predicate
-        Function<Integer, String> p = n -> "(" + a[0] + " * x_" + n + ")";
+        StringBuilder p = new StringBuilder("(" + a[0] + " * x_" + 0 + ")");
         for (int i = 1; i < a.length; i++) {
-            Function<Integer, String> finalP = p;
-            int finalI = i;
-            p = n -> finalP.apply(n) + "(" + a[finalI] + " * x_" + (n + finalI) + ")";
+            p.append("(").append(a[i]).append(" * x_").append(i).append(")");
         }
-        Function<Integer, String> finalP = p;
-        super.PREDICATE = n -> finalP.apply(n) + " >= 1";
+        super.PREDICATE = p + " >= 1";
 
         this.a = a;
+    }
+
+    private static int min(int[] a) {
+        return Arrays.stream(a).min().getAsInt();
+    }
+
+    private static int max(int[] a) {
+        return Arrays.stream(a).max().getAsInt();
     }
 
     @Override
@@ -43,7 +44,7 @@ public class GenMajority extends WeakProtocol<Integer> {
     @Override
     public Set<Integer> getQ() {
         HashSet<Integer> Q = new HashSet<>();
-        for (int i = Arrays.stream(this.a).min().getAsInt(); i <= Arrays.stream(this.a).max().getAsInt(); i++) {
+        for (int i = min(a); i <= max(a); i++) {
             Q.add(i);
         }
         return Q;
@@ -52,7 +53,7 @@ public class GenMajority extends WeakProtocol<Integer> {
     @Override
     public Set<Integer> getI() {
         HashSet<Integer> I = new HashSet<>();
-        for (int ai : this.a) {
+        for (int ai : a) {
             I.add(ai);
         }
         return I;
@@ -80,9 +81,9 @@ public class GenMajority extends WeakProtocol<Integer> {
 
     @Override
     public Optional<Boolean> consensus(Population<Integer> config) {
-        if (config.stream().noneMatch(s -> output(s).isPresent() && output(s).get())) {
+        if (config.stream().noneMatch(s -> s > 0)) {
             return Optional.of(false);
-        } else if (config.stream().noneMatch(s -> output(s).isPresent() && !output(s).get())) {
+        } else if (config.stream().noneMatch(s -> s < 0)) {
             return Optional.of(true);
         } else {
             return Optional.empty();
@@ -103,11 +104,11 @@ public class GenMajority extends WeakProtocol<Integer> {
 
     @Override
     public boolean statesEqual(Integer x, Integer y) {
-        return x == y;
+        return Objects.equals(x, y);
     }
 
     @Override
-    public Integer stateFromString(String s) {
+    public Integer parseString(String s) {
         int v = Integer.parseInt(s);
         if (getQ().contains(v)) {
             return v;

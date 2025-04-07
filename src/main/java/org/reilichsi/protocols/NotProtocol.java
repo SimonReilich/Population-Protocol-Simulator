@@ -58,7 +58,7 @@ public class NotProtocol<T> extends PopulationProtocol<T> {
     }
 
     @Override
-    public T stateFromString(String s) {
-        return this.p.stateFromString(s);
+    public T parseString(String s) {
+        return this.p.parseString(s);
     }
 }

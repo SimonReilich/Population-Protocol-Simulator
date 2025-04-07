@@ -122,13 +122,6 @@ public class Population<T> {
         return false;
     }
 
-    private String format(T state) {
-        if (state instanceof Boolean) {
-            return ((boolean) state) ? "+" : "-";
-        }
-        return state.toString();
-    }
-
     private String toStringArgs(Integer... selected) {
         StringBuilder sb = new StringBuilder();
         sb.append("|");

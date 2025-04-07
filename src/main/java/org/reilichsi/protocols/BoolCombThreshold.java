@@ -14,7 +14,7 @@ public class BoolCombThreshold extends PopulationProtocol<Pair<Integer, Integer>
     private final int cm;
 
     public BoolCombThreshold(BooleanCombination<UnaryCondition> predicate) {
-        super(1, n -> "(" + predicate.toString() + ") [Variable counting not supported]");
+        super(1, "(" + predicate.toString() + ")");
         this.p = predicate;
         this.cm = predicate.getLimits().stream().max(Integer::compareTo).get();
     }
@@ -91,7 +91,7 @@ public class BoolCombThreshold extends PopulationProtocol<Pair<Integer, Integer>
         return x.equals(y);
     }
 
-    public Pair<Integer, Integer> stateFromString(String s) {
+    public Pair<Integer, Integer> parseString(String s) {
         s = s.trim();
         for (int i = s.indexOf(';'); i < s.length(); i++) {
             String first = s.substring(1, i).trim();

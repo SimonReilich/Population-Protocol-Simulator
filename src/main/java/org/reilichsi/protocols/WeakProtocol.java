@@ -1,14 +1,13 @@
 package org.reilichsi.protocols;
 
 import java.util.Optional;
-import java.util.function.Function;
 
 public abstract class WeakProtocol<T> implements Protocol<T> {
 
     public final int ARG_LEN;
-    public Function<Integer, String> PREDICATE;
+    public String PREDICATE;
 
-    public WeakProtocol(int ARG_LEN, Function<Integer, String> PREDICATE) {
+    public WeakProtocol(int ARG_LEN, String PREDICATE) {
         this.ARG_LEN = ARG_LEN;
         this.PREDICATE = PREDICATE;
     }

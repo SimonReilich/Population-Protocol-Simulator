@@ -78,5 +78,5 @@ public interface Protocol<T> {
      * @return the state of type T represented by the string
      * @throws IllegalArgumentException if the string is not a valid representation of a state
      */
-    T stateFromString(String s);
+    T parseString(String s);
 }

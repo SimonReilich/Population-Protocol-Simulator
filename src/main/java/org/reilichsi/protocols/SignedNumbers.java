@@ -10,7 +10,7 @@ import java.util.Set;
 public class SignedNumbers extends PopulationProtocol<Pair<Boolean, Integer>> {
 
     public SignedNumbers() {
-        super(2, n -> "x_" + n + " - 2x_" + (n + 1) + " >= 1");
+        super(2, "x_0 - 2x_1 >= 1");
     }
 
     @Override
@@ -95,7 +95,7 @@ public class SignedNumbers extends PopulationProtocol<Pair<Boolean, Integer>> {
     }
 
     @Override
-    public Pair<Boolean, Integer> stateFromString(String s) {
+    public Pair<Boolean, Integer> parseString(String s) {
         s = s.trim();
         return switch (s) {
             case "+1", "1" -> new Pair<>(true, 1);

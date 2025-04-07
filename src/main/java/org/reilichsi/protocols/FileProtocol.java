@@ -16,7 +16,7 @@ public class FileProtocol extends PopulationProtocol<String> {
     public FileProtocol(String[] tokens) throws IOException {
         // different parts of the input are seperated by ";"
 
-        super(tokens[1].split(",").length, n -> "Custom Predicate");
+        super(tokens[1].split(",").length, "Custom Predicate");
 
         // the set of states is the first line
         this.Q = tokens[0].split(",");
@@ -101,7 +101,7 @@ public class FileProtocol extends PopulationProtocol<String> {
     }
 
     @Override
-    public String stateFromString(String s) {
+    public String parseString(String s) {
         return s;
     }
 }

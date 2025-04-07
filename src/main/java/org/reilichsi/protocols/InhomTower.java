@@ -1,32 +1,28 @@
 package org.reilichsi.protocols;
 
-import org.reilichsi.Helper;
 import org.reilichsi.Pair;
 import org.reilichsi.Population;
+import org.reilichsi.protocols.states.Interval;
 
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 
-public class InhomTower extends PopulationProtocol<Pair<Integer, Integer>> {
+public class InhomTower extends PopulationProtocol<Interval> {
 
-    private final int[] a;
-    private final int t;
+    public final int[] a;
+    public final int t;
 
     public InhomTower(int t, int... a) {
 
-        super(a.length, n -> "");
+        super(a.length, "");
 
         // generating String-representation for predicate
-        Function<Integer, String> p = n -> "(" + a[0] + " * x_" + n + ")";
+        StringBuilder p = new StringBuilder("(" + a[0] + " * x_" + 0 + ")");
         for (int i = 1; i < a.length; i++) {
-            Function<Integer, String> finalP = p;
-            int finalI = i;
-            p = n -> finalP.apply(n) + "(" + a[finalI] + " * x_" + (n + finalI) + ")";
+            p.append("(").append(a[i]).append(" * x_").append(i).append(")");
         }
-        Function<Integer, String> finalP = p;
-        super.PREDICATE = n -> finalP.apply(n) + " >= " + t;
+        super.PREDICATE = p + " >= " + t;
 
         this.a = a;
         this.t = t;
@@ -43,77 +39,70 @@ public class InhomTower extends PopulationProtocol<Pair<Integer, Integer>> {
     }
 
     @Override
-    public Set<Pair<Integer, Integer>> getQ() {
-        HashSet<Pair<Integer, Integer>> Q = new HashSet<>();
+    public Set<Interval> getQ() {
+        HashSet<Interval> Q = new HashSet<>();
         for (int ai : this.a) {
             for (int j = 0; j + ai <= this.t + 1; j++) {
-                Q.add(new Pair<>(j, j + ai));
+                Q.add(new Interval(this, j, j + ai));
             }
         }
         return Q;
     }
 
     @Override
-    public Set<Pair<Integer, Integer>> getI() {
-        HashSet<Pair<Integer, Integer>> I = new HashSet<>();
+    public Set<Interval> getI() {
+        HashSet<Interval> I = new HashSet<>();
         for (int ai : this.a) {
-            I.add(new Pair<>(0, ai));
+            I.add(new Interval(this, 0, ai));
         }
         return I;
     }
 
     @Override
-    public Set<Pair<Pair<Integer, Integer>, Pair<Integer, Integer>>> delta(Pair<Integer, Integer> x, Pair<Integer, Integer> y) {
-        if (Pair.arePairsJoint(x, y) && x.first() <= y.first() && x.second() <= this.t && y.second() <= this.t) {
+    public Set<Pair<Interval, Interval>> delta(Interval x, Interval y) {
+        if (x.overlaps(y) && x.start <= y.end && x.end <= this.t && y.end <= this.t) {
             // step
-            return Set.of(new Pair<>(x, new Pair<>(y.first() + 1, y.second() + 1)));
-        } else if (x.second() == this.t + 1 && y.second() <= this.t) {
+            return Set.of(new Pair<>(x, new Interval(this, y.start + 1, y.end + 1)));
+        } else if (x.end == this.t + 1 && y.end <= this.t) {
             // accum
-            return Set.of(new Pair<>(x, new Pair<>(this.t + 1 - (y.second() - y.first()), this.t + 1)));
+            return Set.of(new Pair<>(x, new Interval(this, this.t + 1 - (y.end - y.start), this.t + 1)));
         }
         return Set.of();
     }
 
     @Override
-    public boolean output(Pair<Integer, Integer> state) {
-        return state.second() == this.t + 1;
+    public boolean output(Interval state) {
+        return state.end == this.t + 1;
     }
 
     @Override
-    public Optional<Boolean> consensus(Population<Pair<Integer, Integer>> config) {
+    public Optional<Boolean> consensus(Population<Interval> config) {
         if (config.stream().anyMatch(this::output)) {
             return config.stream().filter(this::output).count() < config.size() ? Optional.empty() : Optional.of(true);
         } else {
-            return config.stream().anyMatch(s -> config.stream().filter(s2 -> Pair.arePairsJoint(s, s2)).count() > 1) ? Optional.empty() : Optional.of(false);
+            return config.stream().anyMatch(i1 -> config.stream().filter(i1::overlaps).count() > 1) ? Optional.empty() : Optional.of(false);
         }
     }
 
     @Override
-    public Population<Pair<Integer, Integer>> genConfig(int... x) {
+    public Population<Interval> genConfig(int... x) {
         super.assertArgLength(x);
-        Population<Pair<Integer, Integer>> config = new Population<>(this);
+        Population<Interval> config = new Population<>(this);
         for (int i = 0; i < super.ARG_LEN; i++) {
             for (int j = 0; j < x[i]; j++) {
-                config.add(new Pair<>(0, this.a[i]));
+                config.add(new Interval(this, 0, this.a[i]));
             }
         }
         return config;
     }
 
     @Override
-    public boolean statesEqual(Pair<Integer, Integer> x, Pair<Integer, Integer> y) {
+    public boolean statesEqual(Interval x, Interval y) {
         return x.equals(y);
     }
 
-    public Pair<Integer, Integer> stateFromString(String s) {
-        s = s.trim();
-        for (int i = s.indexOf(';'); i < s.length(); i++) {
-            String first = s.substring(1, i).trim();
-            String second = s.substring(i + 2, s.length() - 1).trim();
-            if (Helper.countChar(first, '(') - Helper.countChar(first, ')') == 0 && Helper.countChar(second, '(') - Helper.countChar(second, ')') == 0) {
-                return new Pair<>(Integer.parseInt(first), Integer.parseInt(second));
-            }
-        }
-        throw new IllegalArgumentException("Invalid state: " + s);
+    public Interval parseString(String s) {
+        return Interval.parse(this, s);
     }
 }
+
