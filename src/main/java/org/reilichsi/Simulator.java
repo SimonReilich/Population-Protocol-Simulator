@@ -32,6 +32,10 @@ public class Simulator<T> {
         this.info = System.out;
     }
 
+    public void setConfig(Population<T> config) {
+        this.config = config;
+    }
+
     public static void main(String[] args) throws IOException, InterruptedException {
         Simulator<?> simulator = init();
         Pair<int[], Boolean> setup = simulator.setup();
@@ -144,7 +148,7 @@ public class Simulator<T> {
         throw new IllegalArgumentException("No such weak protocol");
     }
 
-    public void simulate(int[] x, boolean fastSim) throws InterruptedException {
+    public boolean simulate(int[] x, boolean fastSim) throws InterruptedException {
         output.println("\nInput: " + Arrays.toString(x));
         if (!(protocol instanceof FileProtocol)) {
             output.println("Expected output: " + protocol.predicate(x));
@@ -167,6 +171,7 @@ public class Simulator<T> {
         } else {
             info.println(", Done");
         }
+        return protocol.consensus(config).get();
     }
 
     public int calculateInTol(int[] x) {

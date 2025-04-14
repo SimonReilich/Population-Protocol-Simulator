@@ -14,9 +14,9 @@ public class ModCombState {
         this.h = h;
         this.bigMod = bigMod;
 
-        if (h < 0 || h > Math.pow(protocol.m, 2) * 3) {
-            throw new IllegalArgumentException("h must be between 0 and " + (Math.pow(protocol.m, 2) * 3));
-        }
+//        if (h < 0 || h > Math.pow(protocol.m, 2) * 3) {
+//            throw new IllegalArgumentException("h must be between 0 and " + (Math.pow(protocol.m, 2) * 3) + ", but was " + h);
+//        }
     }
 
     @Override

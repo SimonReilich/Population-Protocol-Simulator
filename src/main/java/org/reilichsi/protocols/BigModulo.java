@@ -132,9 +132,11 @@ public class BigModulo extends PopulationProtocol<BigModState> {
     public boolean output(BigModState state) {
         int x = 0;
         for (boolean r : state.result) {
-            x = r ? 1 : 0;
+            if (r) {
+                x++;
+            }
         }
-        return x > state.result.length / 2;
+        return x > m;
     }
 
     @Override
