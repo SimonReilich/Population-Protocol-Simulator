@@ -59,69 +59,74 @@ public class Simulator<T> {
         String protocolCode = r.readLine();
 
         // Initialize the protocol
-        if (protocolCode.equalsIgnoreCase("p")) {
-            info.print("  - Threshold t (t >= 1): ");
-            int t = Integer.parseInt(r.readLine());
-            return new Pebbles(t);
-        } else if (protocolCode.equalsIgnoreCase("t")) {
-            info.print("  - Threshold t (t >= 1): ");
-            int t = Integer.parseInt(r.readLine());
-            return new Tower(t);
-        } else if (protocolCode.equalsIgnoreCase("i")) {
-            info.print("  - Threshold t (t >= 1): ");
-            int t = Integer.parseInt(r.readLine());
-            info.print("  - Number of Dimensions: ");
-            int count = Integer.parseInt(r.readLine());
-            int[] a = new int[count];
-            for (int i = 0; i < a.length; i++) {
-                info.print("  - a_" + i + " (in N): ");
-                a[i] = Integer.parseInt(r.readLine());
-            }
-            return new InhomTower(t, a);
-        } else if (protocolCode.equalsIgnoreCase("s")) {
-            return new SignedNumbers();
-        } else if (protocolCode.equalsIgnoreCase("l")) {
-            info.print("  - Threshold t (t >= 1): ");
-            int t = Integer.parseInt(r.readLine());
-            info.print("  - Modulus m (m > " + t + "): ");
-            int m = Integer.parseInt(r.readLine());
-            info.print("  - Number of Dimensions: ");
-            int count = Integer.parseInt(r.readLine());
-            int[] a = new int[count];
-            for (int i = 0; i < a.length; i++) {
-                info.print("  - a_" + i + " (in N+): ");
-                a[i] = Integer.parseInt(r.readLine());
-            }
-            return new BigModulo(t, m, a);
-        } else if (protocolCode.equalsIgnoreCase("c")) {
-            info.print("  - Threshold t (t >= 1): ");
-            int t = Integer.parseInt(r.readLine());
-            info.print("  - Modulus m (m > " + t + "): ");
-            int m = Integer.parseInt(r.readLine());
-            info.print("  - Number of Dimensions: ");
-            int count = Integer.parseInt(r.readLine());
-            int[] a = new int[count];
-            for (int i = 0; i < a.length; i++) {
-                info.print("  - a_" + i + " (in N+): ");
-                a[i] = Integer.parseInt(r.readLine());
-            }
-            return new ModuloCombined(t, m, a);
-        } else if (protocolCode.equalsIgnoreCase("f")) {
-            info.print("  - File to read from: ");
-            String file = r.readLine();
-            return new FileProtocol(Files.readString(Path.of(file)).replace(" ", "").replace("\n", "").replace("\r", "").split(";"));
-        } else if (protocolCode.equalsIgnoreCase("a")) {
-            return new AndProtocol<>(getProtocol(r, info), getProtocol(r, info));
-        } else if (protocolCode.equalsIgnoreCase("o")) {
-            return new OrProtocol<>(getProtocol(r, info), getProtocol(r, info));
-        } else if (protocolCode.equalsIgnoreCase("n")) {
-            return new NotProtocol<>(getProtocol(r, info));
-        } else if (protocolCode.equalsIgnoreCase("w")) {
-            return new WeakConvert<>(getWeakProtocol(r, info));
-        } else if (protocolCode.equalsIgnoreCase("u")) {
-            return new UnaryThreshold(new BooleanCombination(Predicate.OR, new BooleanCombination(Predicate.AND, new ThresholdClause(0, Predicate.GEQ, 10), new ThresholdClause(0, Predicate.LEQ, 15)), new ThresholdClause(0, Predicate.LEQ, 5)));
+        int t, m, count;
+        int[] a;
+
+        switch (protocolCode) {
+            case "p", "P", "pebbles", "Pebbles":
+                info.print("  - Threshold t (t >= 1): ");
+                t = Integer.parseInt(r.readLine());
+                return new Pebbles(t);
+            case "t", "T", "tower", "Tower":
+                info.print("  - Threshold t (t >= 1): ");
+                t = Integer.parseInt(r.readLine());
+                return new Tower(t);
+            case "i", "I", "inhomtower", "Inhomtower", "InhomTower":
+                info.print("  - Threshold t (t >= 1): ");
+                t = Integer.parseInt(r.readLine());
+                info.print("  - Number of Dimensions: ");
+                count = Integer.parseInt(r.readLine());
+                a = new int[count];
+                for (int i = 0; i < a.length; i++) {
+                    info.print("  - a_" + i + " (in N): ");
+                    a[i] = Integer.parseInt(r.readLine());
+                }
+                return new InhomTower(t, a);
+            case "s", "S", "signednumbers", "Signednumbers", "SignedNumbers":
+                return new SignedNumbers();
+            case "l", "L", "bigmod", "bigmodulo", "Bigmod", "BigMod", "Bigmodulo", "BigModulo":
+                info.print("  - Threshold t (t >= 1): ");
+                t = Integer.parseInt(r.readLine());
+                info.print("  - Modulus m (m > " + t + "): ");
+                m = Integer.parseInt(r.readLine());
+                info.print("  - Number of Dimensions: ");
+                count = Integer.parseInt(r.readLine());
+                a = new int[count];
+                for (int i = 0; i < a.length; i++) {
+                    info.print("  - a_" + i + " (in N+): ");
+                    a[i] = Integer.parseInt(r.readLine());
+                }
+                return new BigModulo(t, m, a);
+            case "c", "C", "modulocomb", "modulocombined", "Modulocomb", "Modulocombined", "ModuloComb", "ModuloCombined":
+                info.print("  - Threshold t (t >= 1): ");
+                t = Integer.parseInt(r.readLine());
+                info.print("  - Modulus m (m > " + t + "): ");
+                m = Integer.parseInt(r.readLine());
+                info.print("  - Number of Dimensions: ");
+                count = Integer.parseInt(r.readLine());
+                a = new int[count];
+                for (int i = 0; i < a.length; i++) {
+                    info.print("  - a_" + i + " (in N+): ");
+                    a[i] = Integer.parseInt(r.readLine());
+                }
+                return new ModuloCombined(t, m, a);
+            case "f", "F", "file", "File":
+                info.print("  - File to read from: ");
+                String file = r.readLine();
+                return new FileProtocol(Files.readString(Path.of(file)).replace(" ", "").replace("\n", "").replace("\r", "").split(";"));
+            case "a", "A", "and", "And", "&", "&&":
+                return new AndProtocol<>(getProtocol(r, info), getProtocol(r, info));
+            case "o", "O", "or", "Or", "|", "||":
+                return new OrProtocol<>(getProtocol(r, info), getProtocol(r, info));
+            case "n", "N", "not", "Not":
+                return new NotProtocol<>(getProtocol(r, info));
+            case "w", "W", "weak", "Weak", "weakconvert", "Weakconvert", "WeakConvert":
+                return new WeakConvert<>(getWeakProtocol(r, info));
+            case "u", "U", "unarythreshold", "Unarythreshold", "UnaryThreshold":
+                return new UnaryThreshold(new BooleanCombination(Predicate.OR, new BooleanCombination(Predicate.AND, new ThresholdClause(0, Predicate.GEQ, 10), new ThresholdClause(0, Predicate.LEQ, 15)), new ThresholdClause(0, Predicate.LEQ, 5)));
+            default:
+                throw new IllegalArgumentException("Unknown protocol: " + protocolCode);
         }
-        throw new IllegalArgumentException("No such Protocol");
     }
 
     private static WeakProtocol<?> getWeakProtocol(BufferedReader r, PrintStream info) throws IOException {

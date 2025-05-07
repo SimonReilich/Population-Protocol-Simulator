@@ -7,6 +7,7 @@ import org.reilichsi.protocols.monadic.predicates.Predicate;
 
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 public class UnaryThreshold extends PopulationProtocol<Pair<Integer, Integer>> {
@@ -71,6 +72,15 @@ public class UnaryThreshold extends PopulationProtocol<Pair<Integer, Integer>> {
             config.add(new Pair<>(1, 1));
         }
         return config;
+    }
+
+    @Override
+    public Optional<Boolean> consensus(Population<Pair<Integer, Integer>> config) {
+        if (!config.stream().map(Pair::second).allMatch(l -> l >= config.size())) {
+            return Optional.empty();
+        } else {
+            return Optional.of(predicate(config.get(0).second()));
+        }
     }
 
     @Override
