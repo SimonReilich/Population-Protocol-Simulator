@@ -1,6 +1,6 @@
 package org.reilichsi.protocols.states;
 
-import org.reilichsi.protocols.ModuloCombined;
+import org.reilichsi.protocols.robustness.modulo.ModuloCombined;
 
 public class ModCombState {
     public final BigModState bigMod;

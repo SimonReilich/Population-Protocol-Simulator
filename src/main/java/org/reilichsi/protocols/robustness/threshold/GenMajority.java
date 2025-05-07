@@ -1,7 +1,8 @@
-package org.reilichsi.protocols;
+package org.reilichsi.protocols.robustness.threshold;
 
 import org.reilichsi.Pair;
 import org.reilichsi.Population;
+import org.reilichsi.protocols.robustness.WeakProtocol;
 
 import java.util.*;
 

@@ -1,6 +1,6 @@
 package org.reilichsi.protocols.states;
 
-import org.reilichsi.protocols.BigModulo;
+import org.reilichsi.protocols.robustness.modulo.BigModulo;
 
 import java.util.Arrays;
 

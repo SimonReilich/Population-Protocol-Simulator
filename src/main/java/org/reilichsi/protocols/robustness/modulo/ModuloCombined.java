@@ -1,7 +1,9 @@
-package org.reilichsi.protocols;
+package org.reilichsi.protocols.robustness.modulo;
 
 import org.reilichsi.Pair;
 import org.reilichsi.Population;
+import org.reilichsi.protocols.PopulationProtocol;
+import org.reilichsi.protocols.robustness.threshold.InhomTower;
 import org.reilichsi.protocols.states.BigModState;
 import org.reilichsi.protocols.states.Interval;
 import org.reilichsi.protocols.states.ModCombState;

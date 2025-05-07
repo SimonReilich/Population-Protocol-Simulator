@@ -1,7 +1,8 @@
-package org.reilichsi.protocols;
+package org.reilichsi.protocols.robustness.threshold;
 
 import org.reilichsi.Pair;
 import org.reilichsi.Population;
+import org.reilichsi.protocols.PopulationProtocol;
 import org.reilichsi.protocols.states.Interval;
 
 import java.util.HashSet;

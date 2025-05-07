@@ -1,4 +1,6 @@
-package org.reilichsi.protocols;
+package org.reilichsi.protocols.robustness;
+
+import org.reilichsi.protocols.Protocol;
 
 import java.util.Optional;
 

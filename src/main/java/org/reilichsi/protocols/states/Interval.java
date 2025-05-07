@@ -1,6 +1,6 @@
 package org.reilichsi.protocols.states;
 
-import org.reilichsi.protocols.InhomTower;
+import org.reilichsi.protocols.robustness.threshold.InhomTower;
 
 import java.util.Arrays;
 

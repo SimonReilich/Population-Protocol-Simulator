@@ -1,7 +1,7 @@
 package org.reilichsi;
 
-import org.reilichsi.protocols.BigModulo;
-import org.reilichsi.protocols.ModuloCombined;
+import org.reilichsi.protocols.robustness.modulo.BigModulo;
+import org.reilichsi.protocols.robustness.modulo.ModuloCombined;
 import org.reilichsi.protocols.states.BigModState;
 import org.reilichsi.protocols.states.ModCombState;
 import org.reilichsi.sniper.NoSniper;

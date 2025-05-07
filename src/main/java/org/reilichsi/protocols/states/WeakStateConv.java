@@ -1,6 +1,6 @@
 package org.reilichsi.protocols.states;
 
-import org.reilichsi.protocols.WeakProtocol;
+import org.reilichsi.protocols.robustness.WeakProtocol;
 
 import java.util.Optional;
 

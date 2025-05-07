@@ -1,8 +1,9 @@
-package org.reilichsi.protocols;
+package org.reilichsi.protocols.robustness;
 
 import org.reilichsi.Helper;
 import org.reilichsi.Pair;
 import org.reilichsi.Population;
+import org.reilichsi.protocols.PopulationProtocol;
 import org.reilichsi.protocols.states.WeakStateConv;
 
 import java.util.HashSet;

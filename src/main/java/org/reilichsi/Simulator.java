@@ -1,9 +1,14 @@
 package org.reilichsi;
 
-import org.reilichsi.predicates.BooleanCombination;
-import org.reilichsi.predicates.PressburgerPred;
-import org.reilichsi.predicates.UnaryThresholdPred;
 import org.reilichsi.protocols.*;
+import org.reilichsi.protocols.monadic.UnaryThreshold;
+import org.reilichsi.protocols.monadic.predicates.BooleanCombination;
+import org.reilichsi.protocols.monadic.predicates.Predicate;
+import org.reilichsi.protocols.monadic.predicates.ThresholdClause;
+import org.reilichsi.protocols.robustness.*;
+import org.reilichsi.protocols.robustness.modulo.BigModulo;
+import org.reilichsi.protocols.robustness.modulo.ModuloCombined;
+import org.reilichsi.protocols.robustness.threshold.*;
 import org.reilichsi.sniper.Sniper;
 
 import java.io.*;
@@ -50,7 +55,7 @@ public class Simulator<T> {
 
     private static PopulationProtocol<?> getProtocol(BufferedReader r, PrintStream info) throws IOException {
         info.println("Choose protocol");
-        info.print("• Protocol to simulate? (p for Pebbles, t for Tower, i for InhomTower, b for BoolCombThreshold, s for SignedNumbers, l for BigModulo, c for ModuloCombined, f for file, a for and, o for or, n for negation, w for WeakConvert): ");
+        info.print("• Protocol to simulate? (p for Pebbles, t for Tower, i for InhomTower, s for SignedNumbers, l for BigModulo, c for ModuloCombined, f for file, a for and, o for or, n for negation, w for WeakConvert): ");
         String protocolCode = r.readLine();
 
         // Initialize the protocol
@@ -73,8 +78,6 @@ public class Simulator<T> {
                 a[i] = Integer.parseInt(r.readLine());
             }
             return new InhomTower(t, a);
-        } else if (protocolCode.equalsIgnoreCase("b")) {
-            return new BoolCombThreshold(new BooleanCombination<>(new BooleanCombination<>(new UnaryThresholdPred(10, PressburgerPred.UB, 1, 1)), PressburgerPred.AND, new BooleanCombination<>(new UnaryThresholdPred(5, PressburgerPred.LB, 1, 1))));
         } else if (protocolCode.equalsIgnoreCase("s")) {
             return new SignedNumbers();
         } else if (protocolCode.equalsIgnoreCase("l")) {
@@ -115,6 +118,8 @@ public class Simulator<T> {
             return new NotProtocol<>(getProtocol(r, info));
         } else if (protocolCode.equalsIgnoreCase("w")) {
             return new WeakConvert<>(getWeakProtocol(r, info));
+        } else if (protocolCode.equalsIgnoreCase("u")) {
+            return new UnaryThreshold(new BooleanCombination(Predicate.OR, new BooleanCombination(Predicate.AND, new ThresholdClause(0, Predicate.GEQ, 10), new ThresholdClause(0, Predicate.LEQ, 15)), new ThresholdClause(0, Predicate.LEQ, 5)));
         }
         throw new IllegalArgumentException("No such Protocol");
     }
