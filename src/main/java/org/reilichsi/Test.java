@@ -31,11 +31,11 @@ public class Test {
                 for (int i = 2 * m; i < 4 * m; i += (int) (Math.random() * (m - 1) + 1)) {
                     Population<BigModState> config = protocol.genConfig(i);
                     simulator.setConfig(config);
-                    if (simulator.simulate(new int[]{i}, true) != protocol.predicate(i)) {
+                    if (simulator.simulate(new int[]{i}, true) != protocol.function(i)) {
                         throw new UnknownError("Failed for m = " + m + ", t = " + t + ", i = " + i);
                     }
                     System.out.println("  for m = " + m + ", t = " + t + ", i = " + i);
-                    System.out.println("    " + config.stream().map(s -> helper(s.result)).reduce((String::concat)).get());
+                    System.out.println("    " + config.stream().map(s -> helper(s.result())).reduce((String::concat)).get());
                 }
             }
         }
@@ -55,7 +55,7 @@ public class Test {
                 for (int i = 1; i < 4 * m; i += (int) (Math.random() * (m - 1) + 1)) {
                     Population<ModCombState> config = protocol.genConfig(i);
                     simulator.setConfig(config);
-                    if (simulator.simulate(new int[]{i}, true) != protocol.predicate(i)) {
+                    if (simulator.simulate(new int[]{i}, true) != protocol.function(i)) {
                         throw new UnknownError("Failed for m = " + m + ", t = " + t + ", i = " + i);
                     }
                     System.out.println("  for m = " + m + ", t = " + t + ", i = " + i);

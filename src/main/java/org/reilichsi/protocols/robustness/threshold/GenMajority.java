@@ -2,7 +2,7 @@ package org.reilichsi.protocols.robustness.threshold;
 
 import org.reilichsi.Pair;
 import org.reilichsi.Population;
-import org.reilichsi.protocols.robustness.WeakProtocol;
+import org.reilichsi.protocols.WeakProtocol;
 
 import java.util.*;
 
@@ -33,7 +33,7 @@ public class GenMajority extends WeakProtocol<Integer> {
     }
 
     @Override
-    public boolean predicate(int... x) {
+    public boolean function(int... x) {
         assertArgLength(x);
         int n = 0;
         for (int i = 0; i < x.length; i++) {
@@ -52,7 +52,7 @@ public class GenMajority extends WeakProtocol<Integer> {
     }
 
     @Override
-    public Set<Integer> getI() {
+    public Set<Integer> I() {
         HashSet<Integer> I = new HashSet<>();
         for (int ai : a) {
             I.add(ai);
@@ -70,7 +70,7 @@ public class GenMajority extends WeakProtocol<Integer> {
     }
 
     @Override
-    public Optional<Boolean> output(Integer state) {
+    public Optional<Boolean> O(Integer state) {
         if (state == 0) {
             return Optional.empty();
         } else if (state > 0) {
@@ -81,7 +81,7 @@ public class GenMajority extends WeakProtocol<Integer> {
     }
 
     @Override
-    public Optional<Boolean> consensus(Population<Integer> config) {
+    public Optional<Boolean> hasConsensus(Population<Integer> config) {
         if (config.stream().noneMatch(s -> s > 0)) {
             return Optional.of(false);
         } else if (config.stream().noneMatch(s -> s < 0)) {

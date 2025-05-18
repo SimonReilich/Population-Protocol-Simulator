@@ -115,9 +115,9 @@ public class Simulator<T> {
                 String file = r.readLine();
                 return new FileProtocol(Files.readString(Path.of(file)).replace(" ", "").replace("\n", "").replace("\r", "").split(";"));
             case "a", "A", "and", "And", "&", "&&":
-                return new AndProtocol<>(getProtocol(r, info), getProtocol(r, info));
+                return new TimesProtocol<>(getProtocol(r, info), getProtocol(r, info));
             case "o", "O", "or", "Or", "|", "||":
-                return new OrProtocol<>(getProtocol(r, info), getProtocol(r, info));
+                return new PlusProtocol<>(getProtocol(r, info), getProtocol(r, info));
             case "n", "N", "not", "Not":
                 return new NotProtocol<>(getProtocol(r, info));
             case "w", "W", "weak", "Weak", "weakconvert", "Weakconvert", "WeakConvert":
@@ -161,34 +161,34 @@ public class Simulator<T> {
     public boolean simulate(int[] x, boolean fastSim) throws InterruptedException {
         output.println("\nInput: " + Arrays.toString(x));
         if (!(protocol instanceof FileProtocol)) {
-            output.println("Expected output: " + protocol.predicate(x));
+            output.println("Expected output: " + protocol.function(x));
         }
         System.out.println("\nStarting simulation...\n");
         output.println(config.toString());
 
         // Run the simulation
         boolean snipeInNextStep = true;
-        while (protocol.consensus(config).isEmpty()) {
+        while (protocol.hasConsensus(config).isEmpty()) {
             snipeInNextStep = simulationStep(fastSim, snipeInNextStep);
         }
 
         // Print the final configuration
         output.println("\n" + config.toString());
-        output.print("\nConsensus reached: " + protocol.consensus(config).get() + ", expected " + protocol.predicate(x));
+        output.print("\nConsensus reached: " + protocol.hasConsensus(config).get() + ", expected " + protocol.function(x));
         if (output != System.out) {
             output.close();
             info.println("Done");
         } else {
             info.println(", Done");
         }
-        return protocol.consensus(config).get();
+        return protocol.hasConsensus(config).get();
     }
 
     public int calculateInTol(int[] x) {
         if (!(protocol instanceof FileProtocol)) {
-            boolean value = protocol.predicate(x);
+            boolean value = protocol.function(x);
             for (int i = 1; i <= Arrays.stream(x).sum(); i++) {
-                if (Helper.getSub(x, i).stream().anyMatch(c -> protocol.predicate(c) != value)) {
+                if (Helper.getSub(x, i).stream().anyMatch(c -> protocol.function(c) != value)) {
                     info.println("• Protocol with this input has the following initial tolerance: " + (i - 1));
                     return i - 1;
                 }
@@ -254,7 +254,7 @@ public class Simulator<T> {
     }
 
     private int[] getInput(BufferedReader r) throws IOException {
-        info.println("• Protocol is computing the following predicate: " + protocol.PREDICATE);
+        info.println("• Protocol is computing the following predicate: " + protocol.FUNCTION);
         int[] x = new int[protocol.ARG_LEN];
 
         for (int i = 0; i < x.length; i++) {

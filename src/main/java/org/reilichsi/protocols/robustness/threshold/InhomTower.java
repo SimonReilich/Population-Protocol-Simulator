@@ -23,14 +23,14 @@ public class InhomTower extends PopulationProtocol<Interval> {
         for (int i = 1; i < a.length; i++) {
             p.append("(").append(a[i]).append(" * x_").append(i).append(")");
         }
-        super.PREDICATE = p + " >= " + t;
+        super.FUNCTION = p + " >= " + t;
 
         this.a = a;
         this.t = t;
     }
 
     @Override
-    public boolean predicate(int... x) {
+    public boolean function(int... x) {
         super.assertArgLength(x);
         int n = 0;
         for (int i = 0; i < x.length; i++) {
@@ -51,7 +51,7 @@ public class InhomTower extends PopulationProtocol<Interval> {
     }
 
     @Override
-    public Set<Interval> getI() {
+    public Set<Interval> I() {
         HashSet<Interval> I = new HashSet<>();
         for (int ai : this.a) {
             I.add(new Interval(this, 0, ai));
@@ -61,25 +61,25 @@ public class InhomTower extends PopulationProtocol<Interval> {
 
     @Override
     public Set<Pair<Interval, Interval>> delta(Interval x, Interval y) {
-        if (x.overlaps(y) && x.start <= y.end && x.end <= this.t && y.end <= this.t) {
+        if (x.overlaps(y) && x.start() <= y.end() && x.end() <= this.t && y.end() <= this.t) {
             // step
-            return Set.of(new Pair<>(x, new Interval(this, y.start + 1, y.end + 1)));
-        } else if (x.end == this.t + 1 && y.end <= this.t) {
+            return Set.of(new Pair<>(x, new Interval(this, y.start() + 1, y.end() + 1)));
+        } else if (x.end() == this.t + 1 && y.end() <= this.t) {
             // accum
-            return Set.of(new Pair<>(x, new Interval(this, this.t + 1 - (y.end - y.start), this.t + 1)));
+            return Set.of(new Pair<>(x, new Interval(this, this.t + 1 - (y.end() - y.start()), this.t + 1)));
         }
         return Set.of();
     }
 
     @Override
-    public boolean output(Interval state) {
-        return state.end == this.t + 1;
+    public boolean O(Interval state) {
+        return state.end() == this.t + 1;
     }
 
     @Override
-    public Optional<Boolean> consensus(Population<Interval> config) {
-        if (config.stream().anyMatch(this::output)) {
-            return config.stream().filter(this::output).count() < config.size() ? Optional.empty() : Optional.of(true);
+    public Optional<Boolean> hasConsensus(Population<Interval> config) {
+        if (config.stream().anyMatch(this::O)) {
+            return config.stream().filter(this::O).count() < config.size() ? Optional.empty() : Optional.of(true);
         } else {
             return config.stream().anyMatch(i1 -> config.stream().filter(i1::overlaps).count() > 1) ? Optional.empty() : Optional.of(false);
         }

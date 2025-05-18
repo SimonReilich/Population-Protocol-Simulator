@@ -1,28 +1,8 @@
 package org.reilichsi.protocols.states;
 
-import org.reilichsi.protocols.robustness.threshold.InhomTower;
+public record Interval(int start, int end) {
 
-import java.util.Arrays;
-
-public class Interval {
-
-    public final int start;
-    public final int end;
-    private final InhomTower protocol;
-
-    public Interval(InhomTower protocol, int start, int end) {
-        this.protocol = protocol;
-        this.start = start;
-        this.end = end;
-    }
-
-    public Interval(int t, int[] a, int start, int end) {
-        this.protocol = new InhomTower(t, a);
-        this.start = start;
-        this.end = end;
-    }
-
-    public static Interval parse(InhomTower protocol, String s) {
+    public static Interval parse(String s) {
         s = s.trim();
         if (!s.startsWith("[")) {
             throw new IllegalArgumentException("invalid interval: " + s);
@@ -34,17 +14,7 @@ public class Interval {
         if (intervall.length != 2) {
             throw new IllegalArgumentException("invalid interval: " + s);
         }
-        return new Interval(protocol, Integer.parseInt(intervall[0]), Integer.parseInt(intervall[1]));
-    }
-
-    private void check() {
-        if (this.start < 0) {
-            throw new IllegalArgumentException("start is out of bounds");
-        } else if (this.end > this.protocol.t + 1) {
-            throw new IllegalArgumentException("end is out of bounds");
-        } else if (Arrays.stream(this.protocol.a).noneMatch(i -> i == this.end - this.start)) {
-            throw new IllegalArgumentException("invalid shape");
-        }
+        return new Interval(Integer.parseInt(intervall[0]), Integer.parseInt(intervall[1]));
     }
 
     public boolean overlaps(Interval interval) {

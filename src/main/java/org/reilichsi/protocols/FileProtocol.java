@@ -5,24 +5,23 @@ import org.reilichsi.Population;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class FileProtocol extends PopulationProtocol<String> {
-    private final String[] Q;
-    private final String[] I;
-    private final Map<String, Map<String, Set<Pair<String, String>>>> transitions;
-    private final Map<String, Boolean> output;
 
-    public FileProtocol(String[] tokens) throws IOException {
+    private final String[] I;
+    private final Map<String, Map<String, Pair<String, String>>> transitions;
+    private final Map<String, Integer> output;
+
+    public FileProtocol(String[] tokens) {
         // different parts of the input are seperated by ";"
 
         super(tokens[1].split(",").length, "Custom Predicate");
 
         // the set of states is the first line
-        this.Q = tokens[0].split(",");
+        String[] Q = tokens[0].split(",");
 
-        for (int i = 0; i < this.Q.length; i++) {
-            this.Q[i] = this.Q[i].trim();
+        for (int i = 0; i < Q.length; i++) {
+            Q[i] = Q[i].trim();
         }
 
         // the set of initial states is the second line
@@ -34,70 +33,46 @@ public class FileProtocol extends PopulationProtocol<String> {
         this.output = new HashMap<>();
 
         // the set of positive outputs Q_+ is the third line
-        Arrays.stream(tokens[2].split(",")).forEach(s -> this.output.put(s, true));
+        Arrays.stream(tokens[2].split(",")).forEach(s -> this.output.put(s, 1));
         // (Q_- = Q \ Q_+)
-        Arrays.stream(this.Q).forEach(s -> this.output.putIfAbsent(s, false));
+        Arrays.stream(Q).forEach(s -> this.output.putIfAbsent(s, 0));
 
         this.transitions = new HashMap<>();
-        Arrays.stream(this.Q).forEach(s -> this.transitions.put(s, new HashMap<>()));
+        Arrays.stream(Q).forEach(s -> this.transitions.put(s, new HashMap<>()));
         for (int i = 3; i < tokens.length; i++) {
             // each transition has the structure p, q -> p', q' with p, q, p', q' in Q
             String[] args = tokens[i].split(",|(->)");
-            Set<Pair<String, String>> set = new HashSet<>(this.transitions.getOrDefault(args[0], Map.of()).getOrDefault(args[1], Set.of()));
-            set.add(new Pair<>(args[2], args[3]));
-            this.transitions.get(args[0]).put(args[1], set);
+            this.transitions.get(args[0]).put(args[1], new Pair<>(args[2], args[3]));
         }
     }
 
     @Override
-    public boolean predicate(int... x) {
+    public int function(int... x) {
         throw new UnsupportedOperationException("Calculating the predicate for custom protocols is not supported");
     }
 
     @Override
-    public Set<String> getQ() {
-        return Arrays.stream(this.Q).collect(Collectors.toSet());
+    public String I(int x) {
+        return this.I[x];
     }
 
     @Override
-    public Set<String> getI() {
-        return Arrays.stream(this.I).collect(Collectors.toSet());
+    public int O(String state) {
+        return this.output.getOrDefault(state, 0);
     }
 
     @Override
-    public Set<Pair<String, String>> delta(String x, String y) {
-        return this.transitions.getOrDefault(x, Map.of()).getOrDefault(y, Set.of());
+    public Pair<String, String> delta(String x, String y) {
+        return this.transitions.getOrDefault(x, Map.of()).getOrDefault(y, new Pair<>(x, y));
     }
 
     @Override
-    public boolean output(String state) {
-        return this.output.getOrDefault(state, false);
-    }
-
-    @Override
-    public Optional<Boolean> consensus(Population<String> config) {
-        if (config.stream().map(this::output).distinct().count() > 1) {
-            return Optional.empty();
+    public boolean hasConsensus(Population<String> config) {
+        if (config.stream().map(this::O).distinct().count() > 1) {
+            return false;
         } else {
-            return config.stream().map(this::output).findFirst();
+            return config.stream().map(this::O).findFirst().isPresent();
         }
-    }
-
-    @Override
-    public Population<String> genConfig(int... x) {
-        super.assertArgLength(x);
-        Population<String> config = new Population<>(this);
-        for (int i = 0; i < super.ARG_LEN; i++) {
-            for (int j = 0; j < x[i]; j++) {
-                config.add(this.I[i]);
-            }
-        }
-        return config;
-    }
-
-    @Override
-    public boolean statesEqual(String x, String y) {
-        return x.equals(y);
     }
 
     @Override

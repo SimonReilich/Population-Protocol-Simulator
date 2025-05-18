@@ -1,7 +1,7 @@
 package org.reilichsi;
 
 import org.reilichsi.protocols.Protocol;
-import org.reilichsi.protocols.robustness.WeakProtocol;
+import org.reilichsi.protocols.WeakProtocol;
 
 import java.util.ArrayList;
 import java.util.Arrays;

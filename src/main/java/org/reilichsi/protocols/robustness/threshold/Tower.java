@@ -4,10 +4,7 @@ import org.reilichsi.Pair;
 import org.reilichsi.Population;
 import org.reilichsi.protocols.PopulationProtocol;
 
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
 
 public class Tower extends PopulationProtocol<Integer> {
 
@@ -19,66 +16,38 @@ public class Tower extends PopulationProtocol<Integer> {
     }
 
     @Override
-    public boolean predicate(int... x) {
-        assertArgLength(x);
-        return x[0] >= this.t;
+    public int function(int... x) {
+        assert x.length == this.ARG_LEN;
+        return (x[0] >= this.t) ? 1 : 0;
     }
 
     @Override
-    public Set<Integer> getQ() {
-        Set<Integer> Q = new HashSet<>();
-        for (int i = 1; i <= this.t; i++) {
-            Q.add(i);
-        }
-        return Q;
+    public Integer I(int x) {
+        return 1;
     }
 
     @Override
-    public Set<Integer> getI() {
-        return Set.of(1);
+    public int O(Integer state) {
+        return (state >= this.t) ? 1 : 0;
     }
 
     @Override
-    public Set<Pair<Integer, Integer>> delta(Integer x, Integer y) {
+    public Pair<Integer, Integer> delta(Integer x, Integer y) {
         if (Objects.equals(x, y) && x < this.t) {
             // push
-            return Set.of(new Pair<>(x + 1, y));
+            return new Pair<>(x + 1, y);
         } else if (Boolean.logicalXor(x == this.t, y == this.t)) {
             // pull
-            return Set.of(new Pair<>(this.t, this.t));
+            return new Pair<>(this.t, this.t);
         }
-        return Set.of();
+        return new Pair<>(x, y);
     }
 
     @Override
-    public boolean output(Integer state) {
-        return state >= this.t;
-    }
-
-    @Override
-    public Optional<Boolean> consensus(Population<Integer> config) {
+    public boolean hasConsensus(Population<Integer> config) {
         if (config.count(this.t) == config.size()) {
-            return Optional.of(true);
-        } else if (config.contains(this.t) || config.count(0) < config.size() - 1) {
-            return Optional.empty();
-        } else {
-            return Optional.of(false);
-        }
-    }
-
-    @Override
-    public Population<Integer> genConfig(int... x) {
-        assertArgLength(x);
-        Population<Integer> config = new Population<>(this);
-        for (int i = 0; i < x[0]; i++) {
-            config.add(1);
-        }
-        return config;
-    }
-
-    @Override
-    public boolean statesEqual(Integer x, Integer y) {
-        return Objects.equals(x, y);
+            return true;
+        } else return !config.contains(this.t) && config.count(0) >= config.size() - 1;
     }
 
     @Override

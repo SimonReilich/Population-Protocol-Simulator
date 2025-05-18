@@ -22,7 +22,7 @@ public class UnaryThreshold extends PopulationProtocol<Pair<Integer, Integer>> {
     }
 
     @Override
-    public boolean output(Pair<Integer, Integer> state) {
+    public boolean O(Pair<Integer, Integer> state) {
         return p.evaluate(state.second());
     }
 
@@ -32,7 +32,7 @@ public class UnaryThreshold extends PopulationProtocol<Pair<Integer, Integer>> {
     }
 
     @Override
-    public boolean predicate(int... x) {
+    public boolean function(int... x) {
         return p.evaluate(x);
     }
 
@@ -48,7 +48,7 @@ public class UnaryThreshold extends PopulationProtocol<Pair<Integer, Integer>> {
     }
 
     @Override
-    public Set<Pair<Integer, Integer>> getI() {
+    public Set<Pair<Integer, Integer>> I() {
         return Set.of(new Pair<>(1, 1));
     }
 
@@ -75,11 +75,11 @@ public class UnaryThreshold extends PopulationProtocol<Pair<Integer, Integer>> {
     }
 
     @Override
-    public Optional<Boolean> consensus(Population<Pair<Integer, Integer>> config) {
+    public Optional<Boolean> hasConsensus(Population<Pair<Integer, Integer>> config) {
         if (!config.stream().map(Pair::second).allMatch(l -> l >= config.size())) {
             return Optional.empty();
         } else {
-            return Optional.of(predicate(config.get(0).second()));
+            return Optional.of(function(config.get(0).second()));
         }
     }
 

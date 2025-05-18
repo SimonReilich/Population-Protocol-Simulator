@@ -1,28 +1,28 @@
 package org.reilichsi.protocols.states;
 
-import org.reilichsi.protocols.robustness.WeakProtocol;
+import org.reilichsi.protocols.WeakProtocol;
 
 import java.util.Optional;
 
 public class WeakStateConv<T> {
 
     private final T state;
-    private final Optional<Boolean> tendency;
+    private final Optional<Integer> tendency;
     private final WeakProtocol<T> protocol;
 
     public WeakStateConv(T state, WeakProtocol<T> protocol) {
         this.state = state;
-        if (protocol.output(state).isEmpty()) {
-            this.tendency = Optional.of(false);
+        if (protocol.O(state).isEmpty()) {
+            this.tendency = Optional.of(0);
         } else {
             this.tendency = Optional.empty();
         }
         this.protocol = protocol;
     }
 
-    public WeakStateConv(T state, WeakProtocol<T> protocol, boolean tendency) {
+    public WeakStateConv(T state, WeakProtocol<T> protocol, int tendency) {
         this.state = state;
-        if (protocol.output(state).isEmpty()) {
+        if (protocol.O(state).isEmpty()) {
             this.tendency = Optional.of(tendency);
         } else {
             this.tendency = Optional.empty();
@@ -38,8 +38,22 @@ public class WeakStateConv<T> {
         return tendency.isPresent();
     }
 
-    public boolean getTendency() {
-        return tendency.orElseGet(() -> protocol.output(state).get());
+    public int getTendency() {
+        return tendency.orElseGet(() -> protocol.O(state).get());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof WeakStateConv) {
+            WeakStateConv<T> other = (WeakStateConv<T>) o;
+            return state.equals(other.state) && tendency.equals(other.tendency);
+        }
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return "(" + state.toString() + ", " + tendency + ")";
     }
 
 }

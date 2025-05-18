@@ -30,7 +30,7 @@ public class ModuloCombined extends PopulationProtocol<ModCombState> {
         for (int i = 1; i < a.length; i++) {
             p.append(" + (").append(a[i]).append(" * x_").append(i).append(")");
         }
-        super.PREDICATE = p + " mod " + m + " >= " + t;
+        super.FUNCTION = p + " mod " + m + " >= " + t;
 
         this.t = t;
         this.m = m;
@@ -41,16 +41,16 @@ public class ModuloCombined extends PopulationProtocol<ModCombState> {
     }
 
     @Override
-    public boolean output(ModCombState state) {
-        if (state.h < 2 * Math.pow(this.m, 2)) {
-            return state.h % this.m >= this.t;
+    public boolean O(ModCombState state) {
+        if (state.h() < 2 * Math.pow(this.m, 2)) {
+            return state.h() % this.m >= this.t;
         } else {
-            return this.modulo.output(state.bigMod);
+            return this.modulo.O(state.bigMod());
         }
     }
 
     @Override
-    public Optional<Boolean> consensus(Population<ModCombState> config) {
+    public Optional<Boolean> hasConsensus(Population<ModCombState> config) {
         if (config.stream().allMatch(s1 -> {
             Population<ModCombState> config2 = new Population<>(this);
             for (int i = 0; i < config.sizeAll(); i++) {
@@ -61,7 +61,7 @@ public class ModuloCombined extends PopulationProtocol<ModCombState> {
             config2.killState(s1);
             return config2.stream().allMatch(s2 -> this.delta(s1, s2).isEmpty());
         })) {
-            return Optional.of(this.output(config.get(0)));
+            return Optional.of(this.O(config.get(0)));
         } else {
             return Optional.empty();
         }
@@ -69,11 +69,11 @@ public class ModuloCombined extends PopulationProtocol<ModCombState> {
 
     @Override
     public String stateToString(ModCombState state) {
-        return "(" + state.h + ", " + modulo.stateToString(state.bigMod) + ", " + inhomTower.stateToString(state.inhomTower) + ")";
+        return "(" + state.h() + ", " + modulo.stateToString(state.bigMod()) + ", " + inhomTower.stateToString(state.inhomTower()) + ")";
     }
 
     @Override
-    public boolean predicate(int... x) {
+    public boolean function(int... x) {
         assertArgLength(x);
         int count = 0;
         for (int i = 0; i < x.length; i++) {
@@ -96,7 +96,7 @@ public class ModuloCombined extends PopulationProtocol<ModCombState> {
     }
 
     @Override
-    public Set<ModCombState> getI() {
+    public Set<ModCombState> I() {
         Set<ModCombState> I = new HashSet<>();
         for (int ai : this.a) {
             int[] v = new int[2 * m];
@@ -110,31 +110,31 @@ public class ModuloCombined extends PopulationProtocol<ModCombState> {
 
     @Override
     public Set<Pair<ModCombState, ModCombState>> delta(ModCombState x, ModCombState y) {
-        Set<Pair<BigModState, BigModState>> moduloDelta = this.modulo.delta(x.bigMod, y.bigMod);
-        Set<Pair<Interval, Interval>> towerDelta = this.inhomTower.delta(x.inhomTower, y.inhomTower);
-        int h = Math.max(x.h, y.h);
+        Set<Pair<BigModState, BigModState>> moduloDelta = this.modulo.delta(x.bigMod(), y.bigMod());
+        Set<Pair<Interval, Interval>> towerDelta = this.inhomTower.delta(x.inhomTower(), y.inhomTower());
+        int h = Math.max(x.h(), y.h());
         Set<Pair<ModCombState, ModCombState>> res = new HashSet<>();
         for (Pair<BigModState, BigModState> moduloStates : moduloDelta) {
             for (Pair<Interval, Interval> towerStates : towerDelta) {
-                int hMod = Math.max(towerStates.first().end, Math.max(towerStates.second().end, h));
+                int hMod = Math.max(towerStates.first().end(), Math.max(towerStates.second().end(), h));
                 res.add(new Pair<>(new ModCombState(this, towerStates.first(), hMod, moduloStates.first()), new ModCombState(this, towerStates.second(), hMod, moduloStates.second())));
             }
         }
         if (moduloDelta.isEmpty()) {
             if (towerDelta.isEmpty()) {
-                if (x.h != h || y.h != h) {
-                    res.add(new Pair<>(new ModCombState(this, x.inhomTower, h, x.bigMod), new ModCombState(this, y.inhomTower, h, y.bigMod)));
+                if (x.h() != h || y.h() != h) {
+                    res.add(new Pair<>(new ModCombState(this, x.inhomTower(), h, x.bigMod()), new ModCombState(this, y.inhomTower(), h, y.bigMod())));
                 }
             } else {
                 for (Pair<Interval, Interval> towerStates : towerDelta) {
-                    int hMod = Math.max(towerStates.first().end, Math.max(towerStates.second().end, h));
-                    res.add(new Pair<>(new ModCombState(this, towerStates.first(), hMod, x.bigMod), new ModCombState(this, towerStates.second(), h, x.bigMod)));
+                    int hMod = Math.max(towerStates.first().end(), Math.max(towerStates.second().end(), h));
+                    res.add(new Pair<>(new ModCombState(this, towerStates.first(), hMod, x.bigMod()), new ModCombState(this, towerStates.second(), h, x.bigMod())));
                 }
             }
         } else if (towerDelta.isEmpty()) {
-            int hMod = Math.max(x.inhomTower.end, Math.max(y.inhomTower.end, h));
+            int hMod = Math.max(x.inhomTower().end(), Math.max(y.inhomTower().end(), h));
             for (Pair<BigModState, BigModState> moduloStates : moduloDelta) {
-                res.add(new Pair<>(new ModCombState(this, x.inhomTower, hMod, moduloStates.first()), new ModCombState(this, y.inhomTower, hMod, moduloStates.second())));
+                res.add(new Pair<>(new ModCombState(this, x.inhomTower(), hMod, moduloStates.first()), new ModCombState(this, y.inhomTower(), hMod, moduloStates.second())));
             }
         }
         return res;

@@ -4,13 +4,7 @@ import org.reilichsi.protocols.robustness.modulo.BigModulo;
 
 import java.util.Arrays;
 
-public class BigModState {
-
-    public final int level;
-    public final int[] tokens;
-    public final boolean[] result;
-
-    public final BigModulo protocol;
+public record BigModState(BigModulo protocol, int level, int[] tokens, boolean[] result) {
 
     public BigModState(BigModulo protocol, int level, int[] tokens, boolean[] result) {
         this.level = level;
