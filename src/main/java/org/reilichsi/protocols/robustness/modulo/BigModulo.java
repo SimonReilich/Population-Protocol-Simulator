@@ -32,61 +32,42 @@ public class BigModulo extends PopulationProtocol<BigModState> {
     }
 
     @Override
-    public boolean function(int... x) {
-        assertArgLength(x);
+    public int function(int... x) {
+        assert x.length == this.ARG_LEN;
         int count = 0;
         for (int i = 0; i < x.length; i++) {
             count += a[i] * x[i];
         }
-        return count % m >= t;
+        return (count % m >= t) ? 1 : 0;
     }
 
     @Override
-    public Set<BigModState> getQ() {
-        Set<BigModState> Q = new HashSet<>();
-        for (int i = 0; i <= 2 * m; i++) {
-            for (int j = 0; j < Math.pow(m, 2 * m); j++) {
-                int[] v = new int[2 * m];
-                Arrays.fill(v, 0);
-                int jMod = j;
-                for (int k = 0; k < 2 * m; k++) {
-                    v[k] = jMod % m;
-                    jMod /= m;
-                }
-                for (int k = 0; k < Math.pow(2, 2 * m); k++) {
-                    boolean[] r = new boolean[2 * m];
-                    Arrays.fill(r, false);
-                    for (int l = 0; l < 2 * m; l++) {
-                        r[l] = (k % 2) == 1;
-                    }
-                    Q.add(new BigModState(this, i, v, r));
-                }
+    public BigModState I(int x) {
+        int[] v = new int[2 * m];
+        Arrays.fill(v, a[x]);
+        boolean[] r = new boolean[2 * m];
+        Arrays.fill(r, false);
+        return new BigModState(this, 0, v, r);
+    }
+
+    @Override
+    public int O(BigModState state) {
+        int x = 0;
+        for (boolean r : state.result()) {
+            if (r) {
+                x++;
             }
         }
-        return Q;
+        return (x > m) ? 1 : 0;
     }
 
     @Override
-    public Set<BigModState> I() {
-        Set<BigModState> I = new HashSet<>();
-        for (int ai : a) {
-            int[] v = new int[2 * m];
-            Arrays.fill(v, ai);
-            boolean[] r = new boolean[2 * m];
-            Arrays.fill(r, false);
-            I.add(new BigModState(this, 0, v, r));
-        }
-        return I;
-    }
-
-    @Override
-    public Set<Pair<BigModState, BigModState>> delta(BigModState x, BigModState y) {
-        Set<Pair<BigModState, BigModState>> result = new HashSet<>();
+    public Pair<BigModState, BigModState> delta(BigModState x, BigModState y) {
         if (x.level() == 0) {
             for (int i = 1; i <= 2 * m; i++) {
                 if (x.tokens()[i - 1] >= 1) {
                     // distrib
-                    result.add(new Pair<>(new BigModState(this, i, x.tokens(), x.result()), y));
+                    return new Pair<>(new BigModState(this, i, x.tokens(), x.result()), y);
                 }
             }
         } else if (1 <= x.level() && y.level() <= 2 * m && x.level() < y.level()) {
@@ -102,7 +83,7 @@ public class BigModulo extends PopulationProtocol<BigModState> {
             w[y.level() - 1] = (w[y.level() - 1] + kv1) % m;
             if (kv1 != v[y.level() - 1] || kv2 != v[x.level() - 1] || kw1 != w[x.level() - 1] || kw2 != w[y.level() - 1]) {
                 // steal
-                result.add(new Pair<>(new BigModState(this, x.level(), v, x.result()), new BigModState(this, y.level(), w, y.result())));
+                return new Pair<>(new BigModState(this, x.level(), v, x.result()), new BigModState(this, y.level(), w, y.result()));
             }
         } else if (x.level() == y.level()) {
             int[] v = Arrays.copyOfRange(x.tokens(), 0, 2 * m);
@@ -111,7 +92,7 @@ public class BigModulo extends PopulationProtocol<BigModState> {
                 v[x.level() - 1] = (v[x.level() - 1] + w[x.level() - 1]) % m;
                 w[x.level() - 1] = 0;
                 // retire
-                result.add(new Pair<>(new BigModState(this, x.level(), v, x.result()), new BigModState(this, 0, w, y.result())));
+                return new Pair<>(new BigModState(this, x.level(), v, x.result()), new BigModState(this, 0, w, y.result()));
             }
         }
 
@@ -122,27 +103,15 @@ public class BigModulo extends PopulationProtocol<BigModState> {
             s[x.level() - 1] = x.tokens()[x.level() - 1] >= this.t;
             if (!Arrays.equals(r, x.result()) || !Arrays.equals(s, y.result())) {
                 // result
-                result.add(new Pair<>(new BigModState(this, x.level(), x.tokens(), r), new BigModState(this, y.level(), y.tokens(), s)));
+                return new Pair<>(new BigModState(this, x.level(), x.tokens(), r), new BigModState(this, y.level(), y.tokens(), s));
             }
         }
-
-        return result;
+        return new Pair<>(x, y);
     }
 
     @Override
-    public boolean O(BigModState state) {
-        int x = 0;
-        for (boolean r : state.result()) {
-            if (r) {
-                x++;
-            }
-        }
-        return x > m;
-    }
-
-    @Override
-    public Optional<Boolean> hasConsensus(Population<BigModState> config) {
-        if (config.stream().allMatch(s1 -> {
+    public boolean hasConsensus(Population<BigModState> config) {
+        return config.stream().allMatch(s1 -> {
             Population<BigModState> config2 = new Population<>(this);
             for (int i = 0; i < config.sizeAll(); i++) {
                 if (config.isActive(i)) {
@@ -150,47 +119,8 @@ public class BigModulo extends PopulationProtocol<BigModState> {
                 }
             }
             config2.killState(s1);
-            return config2.stream().allMatch(s2 -> this.delta(s1, s2).isEmpty());
-        })) {
-            return Optional.of(this.O(config.get(0)));
-        } else {
-            return Optional.empty();
-        }
-    }
-
-    @Override
-    public Population<BigModState> genConfig(int... x) {
-        Population<BigModState> config = new Population<>(this);
-        for (int i = 0; i < x.length; i++) {
-            int[] v = new int[2 * m];
-            Arrays.fill(v, a[i]);
-            boolean[] r = new boolean[2 * m];
-            Arrays.fill(r, false);
-            for (int j = 0; j < x[i]; j++) {
-                config.add(new BigModState(this, 0, v, r));
-            }
-        }
-        return config;
-    }
-
-    @Override
-    public boolean statesEqual(BigModState x, BigModState y) {
-        return x.equals(y);
-    }
-
-    @Override
-    public String stateToString(BigModState state) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("(").append(state.level()).append(", (").append(state.tokens()[0]);
-        for (int i = 1; i < state.tokens().length; i++) {
-            sb.append(", ").append(state.tokens()[i]);
-        }
-        sb.append("), ");
-        for (boolean r : state.result()) {
-            sb.append(r ? "+" : "-");
-        }
-        sb.append(")");
-        return sb.toString();
+            return this.hasConsensus(config2);
+        });
     }
 
     @Override

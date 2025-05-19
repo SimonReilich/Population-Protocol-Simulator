@@ -57,6 +57,17 @@ public class InhomTowerCancle extends WeakProtocol<EitherOr<Integer, Interval>> 
     }
 
     @Override
+    public Optional<Integer> O(EitherOr<Integer, Interval> state) {
+        if (state.isT() && state.getT() != 0) {
+            return Optional.of(0);
+        } else if (state.isU() && state.getU().end() >= this.t) {
+            return Optional.of(1);
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    @Override
     public Pair<EitherOr<Integer, Interval>, EitherOr<Integer, Interval>> delta(EitherOr<Integer, Interval> x, EitherOr<Integer, Interval> y) {
         if (x.isU() && y.isU() && x.getU().overlaps(y.getU()) && x.getU().start() <= y.getU().start() && x.getU().end() < this.T && y.getU().end() < this.T) {
             // step
@@ -74,27 +85,11 @@ public class InhomTowerCancle extends WeakProtocol<EitherOr<Integer, Interval>> 
     }
 
     @Override
-    public Optional<Integer> O(EitherOr<Integer, Interval> state) {
-        if (state.isT() && state.getT() != 0) {
-            return Optional.of(0);
-        } else if (state.isU() && state.getU().end() >= this.t) {
-            return Optional.of(1);
-        } else {
-            return Optional.empty();
-        }
-    }
-
-    @Override
     public boolean hasConsensus(Population<EitherOr<Integer, Interval>> config) {
         if (config.stream().filter(EitherOr::isT).map(EitherOr::getT).anyMatch(s -> s != 0)) {
             return config.stream().noneMatch(EitherOr::isU);
         }
         return true;
-    }
-
-    @Override
-    public boolean statesEqual(EitherOr<Integer, Interval> x, EitherOr<Integer, Interval> y) {
-        return x.equals(y);
     }
 
     @Override

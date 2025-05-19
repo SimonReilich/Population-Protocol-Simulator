@@ -2,9 +2,6 @@ package org.reilichsi;
 
 import org.reilichsi.protocols.*;
 import org.reilichsi.protocols.monadic.UnaryThreshold;
-import org.reilichsi.protocols.monadic.predicates.BooleanCombination;
-import org.reilichsi.protocols.monadic.predicates.Predicate;
-import org.reilichsi.protocols.monadic.predicates.ThresholdClause;
 import org.reilichsi.protocols.robustness.*;
 import org.reilichsi.protocols.robustness.modulo.BigModulo;
 import org.reilichsi.protocols.robustness.modulo.ModuloCombined;
@@ -118,12 +115,12 @@ public class Simulator<T> {
                 return new TimesProtocol<>(getProtocol(r, info), getProtocol(r, info));
             case "o", "O", "or", "Or", "|", "||":
                 return new PlusProtocol<>(getProtocol(r, info), getProtocol(r, info));
-            case "n", "N", "not", "Not":
-                return new NotProtocol<>(getProtocol(r, info));
             case "w", "W", "weak", "Weak", "weakconvert", "Weakconvert", "WeakConvert":
                 return new WeakConvert<>(getWeakProtocol(r, info));
             case "u", "U", "unarythreshold", "Unarythreshold", "UnaryThreshold":
-                return new UnaryThreshold(new BooleanCombination(Predicate.OR, new BooleanCombination(Predicate.AND, new ThresholdClause(0, Predicate.GEQ, 10), new ThresholdClause(0, Predicate.LEQ, 15)), new ThresholdClause(0, Predicate.LEQ, 5)));
+                info.print("  - Threshold cMax (cMax >= 1): ");
+                int cMax = Integer.parseInt(r.readLine());
+                return new UnaryThreshold(cMax);
             default:
                 throw new IllegalArgumentException("Unknown protocol: " + protocolCode);
         }
@@ -158,7 +155,7 @@ public class Simulator<T> {
         throw new IllegalArgumentException("No such weak protocol");
     }
 
-    public boolean simulate(int[] x, boolean fastSim) throws InterruptedException {
+    public int simulate(int[] x, boolean fastSim) throws InterruptedException {
         output.println("\nInput: " + Arrays.toString(x));
         if (!(protocol instanceof FileProtocol)) {
             output.println("Expected output: " + protocol.function(x));
@@ -168,25 +165,25 @@ public class Simulator<T> {
 
         // Run the simulation
         boolean snipeInNextStep = true;
-        while (protocol.hasConsensus(config).isEmpty()) {
+        while (!protocol.hasConsensus(config)) {
             snipeInNextStep = simulationStep(fastSim, snipeInNextStep);
         }
 
         // Print the final configuration
         output.println("\n" + config.toString());
-        output.print("\nConsensus reached: " + protocol.hasConsensus(config).get() + ", expected " + protocol.function(x));
+        output.print("\nConsensus reached: " + protocol.O(config.get(0)) + ", expected " + protocol.function(x));
         if (output != System.out) {
             output.close();
             info.println("Done");
         } else {
             info.println(", Done");
         }
-        return protocol.hasConsensus(config).get();
+        return protocol.O(config.get(0));
     }
 
     public int calculateInTol(int[] x) {
         if (!(protocol instanceof FileProtocol)) {
-            boolean value = protocol.function(x);
+            int value = protocol.function(x);
             for (int i = 1; i <= Arrays.stream(x).sum(); i++) {
                 if (Helper.getSub(x, i).stream().anyMatch(c -> protocol.function(c) != value)) {
                     info.println("• Protocol with this input has the following initial tolerance: " + (i - 1));
@@ -226,7 +223,7 @@ public class Simulator<T> {
         do {
             agent2 = (int) (Math.random() * config.sizeAll());
         } while (agent1 == agent2 || !config.isActive(agent2));
-        Pair<T, T> newState = pickRandomPair(protocol.delta(config.get(agent1), config.get(agent2)));
+        Pair<T, T> newState = protocol.delta(config.get(agent1), config.get(agent2));
 
         if (newState == null) {
             return false;

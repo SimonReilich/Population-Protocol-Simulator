@@ -19,7 +19,7 @@ public class GenMajority extends WeakProtocol<Integer> {
         for (int i = 1; i < a.length; i++) {
             p.append("(").append(a[i]).append(" * x_").append(i).append(")");
         }
-        super.PREDICATE = p + " >= 1";
+        super.FUNCTION = p + " >= 1";
 
         this.a = a;
     }
@@ -33,74 +33,47 @@ public class GenMajority extends WeakProtocol<Integer> {
     }
 
     @Override
-    public boolean function(int... x) {
-        assertArgLength(x);
+    public int function(int... x) {
+        assert x.length == this.ARG_LEN;
         int n = 0;
         for (int i = 0; i < x.length; i++) {
             n += this.a[i] * x[i];
         }
-        return n >= 1;
+        return (n >= 1) ? 1 : 0;
     }
 
     @Override
-    public Set<Integer> getQ() {
-        HashSet<Integer> Q = new HashSet<>();
-        for (int i = min(a); i <= max(a); i++) {
-            Q.add(i);
-        }
-        return Q;
+    public Integer I(int x) {
+        return a[x];
     }
 
     @Override
-    public Set<Integer> I() {
-        HashSet<Integer> I = new HashSet<>();
-        for (int ai : a) {
-            I.add(ai);
-        }
-        return I;
-    }
-
-    @Override
-    public Set<Pair<Integer, Integer>> delta(Integer x, Integer y) {
-        if (x < 0 && 0 < y) {
-            // balancing
-            return Set.of(new Pair<>(x + y, 0));
-        }
-        return Set.of();
-    }
-
-    @Override
-    public Optional<Boolean> O(Integer state) {
+    public Optional<Integer> O(Integer state) {
         if (state == 0) {
             return Optional.empty();
         } else if (state > 0) {
-            return Optional.of(true);
+            return Optional.of(1);
         } else {
-            return Optional.of(false);
+            return Optional.of(0);
         }
     }
 
     @Override
-    public Optional<Boolean> hasConsensus(Population<Integer> config) {
+    public Pair<Integer, Integer> delta(Integer x, Integer y) {
+        if (x < 0 && 0 < y) {
+            // balancing
+            return new Pair<>(x + y, 0);
+        }
+        return new Pair<>(x, y);
+    }
+
+    @Override
+    public boolean hasConsensus(Population<Integer> config) {
         if (config.stream().noneMatch(s -> s > 0)) {
-            return Optional.of(false);
-        } else if (config.stream().noneMatch(s -> s < 0)) {
-            return Optional.of(true);
+            return true;
         } else {
-            return Optional.empty();
+            return config.stream().noneMatch(s -> s < 0);
         }
-    }
-
-    @Override
-    public Population<Integer> genConfig(int... x) {
-        assertArgLength(x);
-        Population<Integer> config = new Population<>(this);
-        for (int i = 0; i < x.length; i++) {
-            for (int j = 0; j < x[i]; j++) {
-                config.add(this.a[i]);
-            }
-        }
-        return config;
     }
 
     @Override
@@ -110,11 +83,6 @@ public class GenMajority extends WeakProtocol<Integer> {
 
     @Override
     public Integer parseString(String s) {
-        int v = Integer.parseInt(s);
-        if (getQ().contains(v)) {
-            return v;
-        } else {
-            throw new IllegalArgumentException("Invalid state: " + s);
-        }
+        return Integer.parseInt(s);
     }
 }
